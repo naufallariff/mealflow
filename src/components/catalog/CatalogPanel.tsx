@@ -1,7 +1,7 @@
 // src/components/catalog/CatalogPanel.tsx
 
 import React, { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers, Plus, Search } from 'lucide-react';
 import type { CatalogCategory, CatalogItem, ItemKind } from '../../types/meal';
 import { CATEGORY_META } from '../../data/default-catalog';
 import { useDebouncedValue } from '../../hooks/use-debounced-value';
@@ -61,30 +61,42 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
     };
 
     return (
-        <aside className="flex flex-col rounded-2xl border border-[#E5E5EA] bg-white p-4 shadow-2xs">
+        <div className="flex flex-col">
+            {/* Header */}
             <div className="flex items-center justify-between gap-2">
-                <div>
-                    <h2 className="text-sm font-semibold text-[#1C1C1E]">Katalog Puzzle</h2>
-                    <p className="text-[11px] text-[#636366]">{filteredItems.length} item tersedia</p>
+                <div className="flex items-center gap-2">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-brand-glass text-brand">
+                        <Layers className="h-4 w-4" />
+                    </div>
+                    <div>
+                        <h2 className="text-sm font-extrabold tracking-tight text-ink-primary">
+                            Katalog Puzzle
+                        </h2>
+                        <p className="tabular-nums text-[11px] font-medium text-ink-muted">
+                            {filteredItems.length} item tersedia
+                        </p>
+                    </div>
                 </div>
+
                 <button
                     type="button"
                     onClick={() => setIsModalOpen(true)}
-                    className="inline-flex min-h-8.5 items-center gap-1 rounded-xl bg-[#007AFF] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0066D6] active:scale-[0.97]"
+                    data-variant="primary"
+                    className="mf-liquid-pill min-h-8.5 px-3 text-xs"
                 >
                     <Plus className="h-3.5 w-3.5" />
                     <span>Tambah Item</span>
                 </button>
             </div>
 
-            {/* Food vs Drink Segmented Control */}
-            <div className="mt-3 grid grid-cols-2 gap-1 rounded-xl bg-[#F2F2F7] p-1">
+            {/* Food vs Drink Liquid Segmented Control */}
+            <div className="mt-3 grid grid-cols-2 gap-1 rounded-full border border-black/8 bg-white/45 p-1 backdrop-blur-md dark:border-white/10 dark:bg-white/5">
                 <button
                     type="button"
                     onClick={() => handleSwitchKind('food')}
-                    className={`rounded-lg py-1.5 text-xs font-semibold transition-colors ${activeKind === 'food'
-                            ? 'bg-white text-[#1C1C1E] shadow-2xs'
-                            : 'text-[#636366]'
+                    className={`rounded-full py-1.5 text-xs font-bold transition-all duration-150 ${activeKind === 'food'
+                            ? 'bg-white text-ink-primary shadow-xs dark:bg-white/15'
+                            : 'text-ink-secondary hover:text-ink-primary'
                         }`}
                 >
                     Makanan ({items.filter((i) => i.kind === 'food').length})
@@ -92,18 +104,18 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                 <button
                     type="button"
                     onClick={() => handleSwitchKind('drink')}
-                    className={`rounded-lg py-1.5 text-xs font-semibold transition-colors ${activeKind === 'drink'
-                            ? 'bg-white text-[#1C1C1E] shadow-2xs'
-                            : 'text-[#636366]'
+                    className={`rounded-full py-1.5 text-xs font-bold transition-all duration-150 ${activeKind === 'drink'
+                            ? 'bg-white text-ink-primary shadow-xs dark:bg-white/15'
+                            : 'text-ink-secondary hover:text-ink-primary'
                         }`}
                 >
                     Minuman ({items.filter((i) => i.kind === 'drink').length})
                 </button>
             </div>
 
-            {/* Search Input */}
+            {/* Translucent Search Input */}
             <div className="relative mt-2.5">
-                <Search className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-[#8E8E93]" />
+                <Search className="pointer-events-none absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
                 <input
                     type="search"
                     value={searchText}
@@ -116,7 +128,7 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                             ? 'Cari ayam, telur, nasi padang, sushi...'
                             : 'Cari kopi, teh, susu UHT, matcha...'
                     }
-                    className="h-9 w-full rounded-xl border border-[#E5E5EA] bg-[#F8F9FB] pr-3 pl-8 text-xs text-[#1C1C1E] outline-none focus:border-[#007AFF] focus:bg-white"
+                    className="h-9.5 w-full rounded-full border border-black/8 bg-white/70 pr-3.5 pl-9 text-xs font-medium text-ink-primary placeholder:text-ink-muted outline-none transition-all focus:border-brand focus:bg-white focus:ring-2 focus:ring-brand/20 dark:border-white/12 dark:bg-white/8 dark:focus:bg-white/15"
                 />
             </div>
 
@@ -128,35 +140,40 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                         setSelectedCategory('all');
                         setPage(1);
                     }}
-                    className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors ${selectedCategory === 'all'
-                            ? 'bg-[#1C1C1E] text-white'
-                            : 'bg-[#F2F2F7] text-[#636366] hover:text-[#1C1C1E]'
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-bold transition-all duration-150 active:scale-95 ${selectedCategory === 'all'
+                            ? 'bg-slate-900 text-white shadow-2xs dark:bg-white dark:text-slate-900'
+                            : 'border border-black/6 bg-white/55 text-ink-secondary hover:bg-white/85 hover:text-ink-primary dark:border-white/10 dark:bg-white/6'
                         }`}
                 >
                     Semua
                 </button>
-                {categoryOptions.map((cat) => (
-                    <button
-                        key={cat}
-                        type="button"
-                        onClick={() => {
-                            setSelectedCategory(cat);
-                            setPage(1);
-                        }}
-                        className={`rounded-lg px-2.5 py-1 text-[11px] font-medium transition-colors ${selectedCategory === cat
-                                ? 'bg-[#1C1C1E] text-white'
-                                : 'bg-[#F2F2F7] text-[#636366] hover:text-[#1C1C1E]'
-                            }`}
-                    >
-                        {CATEGORY_META[cat].label}
-                    </button>
-                ))}
+                {categoryOptions.map((cat) => {
+                    const meta = CATEGORY_META[cat];
+                    const isSelected = selectedCategory === cat;
+                    return (
+                        <button
+                            key={cat}
+                            type="button"
+                            onClick={() => {
+                                setSelectedCategory(cat);
+                                setPage(1);
+                            }}
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all duration-150 active:scale-95 ${isSelected
+                                    ? 'bg-slate-900 text-white shadow-2xs dark:bg-white dark:text-slate-900'
+                                    : 'border border-black/6 bg-white/55 text-ink-secondary hover:bg-white/85 hover:text-ink-primary dark:border-white/10 dark:bg-white/6'
+                                }`}
+                        >
+                            <span className={`h-1.5 w-1.5 rounded-full ${meta.dotColor}`} />
+                            <span>{meta.label}</span>
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Paginated Item Cards */}
             <div className="mt-3 space-y-2">
                 {paginatedItems.length === 0 ? (
-                    <p className="rounded-xl border border-dashed border-[#D1D1D6] py-8 text-center text-xs text-[#8E8E93]">
+                    <p className="rounded-2xl border border-dashed border-black/15 bg-white/40 py-8 text-center text-xs font-medium text-ink-muted dark:border-white/15 dark:bg-white/5">
                         Tidak ada item yang cocok dengan filter.
                     </p>
                 ) : (
@@ -172,26 +189,26 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                 )}
             </div>
 
-            {/* Pagination Controls */}
+            {/* Liquid Pagination Controls */}
             {totalPages > 1 && (
-                <div className="mt-3 flex items-center justify-between border-t border-[#E5E5EA] pt-2.5">
+                <div className="mt-3.5 flex items-center justify-between border-t border-black/8 pt-3 dark:border-white/10">
                     <button
                         type="button"
                         disabled={safePage <= 1}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#E5E5EA] bg-[#F8F9FB] px-2.5 text-xs font-medium text-[#1C1C1E] disabled:opacity-40"
+                        className="mf-liquid-pill min-h-8 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
                     >
                         <ChevronLeft className="h-3.5 w-3.5" />
                         <span>Prev</span>
                     </button>
-                    <span className="tabular-nums text-xs text-[#636366]">
+                    <span className="tabular-nums text-xs font-bold text-ink-secondary">
                         Hal {safePage} / {totalPages}
                     </span>
                     <button
                         type="button"
                         disabled={safePage >= totalPages}
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        className="inline-flex h-8 items-center gap-1 rounded-lg border border-[#E5E5EA] bg-[#F8F9FB] px-2.5 text-xs font-medium text-[#1C1C1E] disabled:opacity-40"
+                        className="mf-liquid-pill min-h-8 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
                     >
                         <span>Next</span>
                         <ChevronRight className="h-3.5 w-3.5" />
@@ -204,6 +221,6 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                 onClose={() => setIsModalOpen(false)}
                 onAddItem={onAddCustomItem}
             />
-        </aside>
+        </div>
     );
 };

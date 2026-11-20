@@ -1,0 +1,40 @@
+name: Mealflow CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+# Batalkan run lama secara otomatis jika ada commit baru di PR/branch yang sama
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-and-build:
+    name: Lint, Typecheck & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Oxlint
+        run: npx oxlint .
+
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+
+      - name: Build production bundle (Vite)
+        run: npm run build

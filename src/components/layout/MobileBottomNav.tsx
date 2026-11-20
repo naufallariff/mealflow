@@ -27,28 +27,25 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             {
                 id: 'calendar',
                 label: 'Kalender',
-                icon: <CalendarDays className="h-5 w-5" />,
+                icon: <CalendarDays className="h-4.5 w-4.5" />,
                 badge: scheduledCount > 0 ? scheduledCount : undefined,
             },
             {
                 id: 'catalog',
                 label: 'Katalog',
-                icon: <LayoutGrid className="h-5 w-5" />,
+                icon: <LayoutGrid className="h-4.5 w-4.5" />,
             },
             {
                 id: 'summary',
                 label: 'Belanja',
-                icon: <ShoppingBag className="h-5 w-5" />,
+                icon: <ShoppingBag className="h-4.5 w-4.5" />,
                 badge: groceryItemCount > 0 ? groceryItemCount : undefined,
             },
         ];
 
     return (
-        <nav
-            aria-label="Navigasi utama mobile"
-            className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E5E5EA] bg-white/95 px-2 pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] backdrop-blur-md lg:hidden"
-        >
-            <div className="grid grid-cols-3 gap-1">
+        <nav aria-label="Navigasi utama mobile" className="mf-mobile-dock-wrap">
+            <div className="mf-mobile-dock">
                 {tabs.map((tab) => {
                     const isActive = activeTab === tab.id;
                     return (
@@ -56,16 +53,15 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                             key={tab.id}
                             type="button"
                             onClick={() => onChangeTab(tab.id)}
-                            className={`relative flex min-h-11.5lex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 text-[11px] font-medium transition-colors active:scale-[0.97] ${isActive
-                                    ? 'bg-[#007AFF]/10 text-[#007AFF]'
-                                    : 'text-[#636366] hover:bg-[#F2F2F7]'
-                                }`}
+                            aria-current={isActive ? 'page' : undefined}
+                            data-active={isActive}
+                            className="mf-dock-tab"
                         >
-                            <div className="relative">
+                            <div className="relative flex items-center justify-center">
                                 {tab.icon}
                                 {tab.badge !== undefined && (
-                                    <span className="tabular-nums absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#007AFF] px-1 text-[10px] font-bold text-white">
-                                        {tab.badge}
+                                    <span className="mf-dock-badge">
+                                        {tab.badge > 99 ? '99+' : tab.badge}
                                     </span>
                                 )}
                             </div>

@@ -16,7 +16,9 @@ interface CatalogItemCardProps {
 export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
     ({ item, usedCount, onQuickSchedule, onDeleteCustom }) => {
         const meta = CATEGORY_META[item.category];
-        const perPortion = Math.round(item.packPrice / Math.max(1, item.portionsPerPack));
+        const perPortion = Math.round(
+            item.packPrice / Math.max(1, item.portionsPerPack),
+        );
 
         const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
             e.dataTransfer.setData('text/plain', item.id);
@@ -27,43 +29,57 @@ export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
             <div
                 draggable
                 onDragStart={handleDragStart}
-                className="group flex items-center justify-between gap-2 rounded-xl border border-[#E5E5EA] bg-[#F8F9FB] p-2.5 transition-colors hover:border-[#D1D1D6] hover:bg-white"
+                className="mf-catalog-card group cursor-grab active:cursor-grabbing"
             >
                 <div className="flex min-w-0 flex-1 items-start gap-2">
-                    <GripVertical className="mt-1 hidden h-4 w-4 shrink-0 cursor-grab text-[#8E8E93] sm:block" />
+                    <GripVertical
+                        aria-hidden="true"
+                        className="mt-1 hidden h-4 w-4 shrink-0 text-ink-muted/70 transition-colors group-hover:text-ink-secondary sm:block"
+                    />
                     <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-1.5">
-                            <p className="truncate text-xs font-semibold text-[#1C1C1E]">{item.name}</p>
+                            <p
+                                title={item.name}
+                                className="truncate text-xs font-bold tracking-tight text-ink-primary"
+                            >
+                                {item.name}
+                            </p>
                             {usedCount > 0 && (
-                                <span className="tabular-nums shrink-0 rounded-full bg-[#007AFF] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                                <span className="tabular-nums shrink-0 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 px-1.5 py-0.5 text-[10px] font-extrabold text-white shadow-2xs">
                                     {usedCount}x
                                 </span>
                             )}
                         </div>
-                        <p className="tabular-nums mt-0.5 text-[11px] text-[#636366]">
-                            {item.packUnit} · <strong className="text-[#1C1C1E]">{formatIdr(item.packPrice)}</strong>
+
+                        <p className="tabular-nums mt-0.5 text-[11px] font-medium text-ink-secondary">
+                            {item.packUnit} ·{' '}
+                            <strong className="font-bold text-ink-primary">
+                                {formatIdr(item.packPrice)}
+                            </strong>
                         </p>
+
                         <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                             <span
-                                className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-medium ${meta.badgeBg} ${meta.badgeText}`}
+                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${meta.badgeBg} ${meta.badgeText}`}
                             >
                                 <span className={`h-1.5 w-1.5 rounded-full ${meta.dotColor}`} />
                                 {meta.label}
                             </span>
-                            <span className="tabular-nums text-[10px] text-[#8E8E93]">
+                            <span className="tabular-nums text-[10px] font-medium text-ink-muted">
                                 {formatIdr(perPortion)}/porsi (÷{item.portionsPerPack})
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1.5">
                     {item.isCustom && onDeleteCustom && (
                         <button
                             type="button"
                             onClick={() => onDeleteCustom(item.id)}
                             title="Hapus item kustom"
-                            className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#E5E5EA] bg-white text-[#FF3B30] hover:bg-red-50 active:scale-[0.96]"
+                            aria-label={`Hapus item kustom ${item.name}`}
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-black/8 bg-white/75 text-red-600 transition-transform duration-150 hover:bg-red-500/12 active:scale-90 dark:border-white/12 dark:bg-white/10 dark:text-red-400"
                         >
                             <Trash2 className="h-3.5 w-3.5" />
                         </button>
@@ -71,7 +87,8 @@ export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
                     <button
                         type="button"
                         onClick={() => onQuickSchedule(item)}
-                        className="inline-flex min-h-8.5 items-center gap-1 rounded-lg bg-[#007AFF] px-2.5 py-1.5 text-xs font-semibold text-white shadow-2xs hover:bg-[#0066D6] active:scale-[0.96]"
+                        data-variant="primary"
+                        className="mf-liquid-pill min-h-8.5 px-3 text-xs"
                     >
                         <Plus className="h-3.5 w-3.5" />
                         <span>Pasang</span>
@@ -81,3 +98,5 @@ export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
         );
     },
 );
+
+CatalogItemCard.displayName = 'CatalogItemCard';
