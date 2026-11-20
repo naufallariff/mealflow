@@ -1,124 +1,128 @@
-/* ==========================================================================
-   MEALFLOW LIQUID GLASS & COLORFUL OS TOKENS (Tailwind CSS v4)
-   Terinspirasi dari Apple HIG (Materials, Depth, Vibrancy & Fluid Springs)
-   ========================================================================== */
+/* src/styles/tokens.css */
 
-@theme {
-    /* --- Typography --- */
-    --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+:root,
+[data-theme="light"] {
+  color-scheme: light;
 
-    /* --- Ink / Vibrancy Typography (Kontras tinggi di atas kaca) --- */
-    --color-ink-primary: #0f172a;
-    --color-ink-secondary: #334155;
-    --color-ink-muted: #64748b;
+  /* Canvas & Ambient Light (White-First Default) */
+  --bg-canvas: #f3f6fb;
+  --bg-ambient-1: rgba(37, 99, 235, 0.06);
+  --bg-ambient-2: rgba(14, 165, 233, 0.05);
 
-    /* --- Liquid Glass Materials (Light Mode) --- */
-    --glass-bg-base: rgba(255, 255, 255, 0.68);
-    --glass-bg-elevated: rgba(255, 255, 255, 0.82);
-    --glass-bg-subtle: rgba(255, 255, 255, 0.48);
-    --glass-bg-chrome: rgba(255, 255, 255, 0.76);
+  /* Frosted Surfaces (Tegas, Milky, Zero GPU Bloat) */
+  --glass-panel: rgba(255, 255, 255, 0.86);
+  --glass-card: #ffffff;
+  --glass-card-sheen: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(248, 250, 252, 0.94) 100%
+  );
+  --glass-card-subtle: #f8fafc;
+  --glass-pill: #ffffff;
+  --glass-nav: rgba(255, 255, 255, 0.84);
 
-    --glass-border: rgba(255, 255, 255, 0.72);
-    --glass-border-outer: rgba(15, 23, 42, 0.08);
-    --glass-specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.92);
+  /* Crisp Borders & Specular Shadows */
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.14);
+  --specular-edge: inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+  --shadow-panel:
+    0 10px 28px -10px rgba(15, 23, 42, 0.06),
+    0 2px 6px -1px rgba(15, 23, 42, 0.03);
+  --shadow-card:
+    0 3px 10px -3px rgba(15, 23, 42, 0.05), 0 1px 2px 0 rgba(15, 23, 42, 0.03);
+  --shadow-float:
+    0 16px 36px -8px rgba(15, 23, 42, 0.14),
+    0 4px 12px -2px rgba(15, 23, 42, 0.06);
 
-    --glass-shadow-sm:
-        0 4px 16px -2px rgba(15, 23, 42, 0.05),
-        0 1px 3px 0 rgba(15, 23, 42, 0.04),
-        var(--glass-specular-top);
+  /* Typography Ink */
+  --ink-primary: #0f172a;
+  --ink-secondary: #475569;
+  --ink-muted: #64748b;
 
-    --glass-shadow-lg:
-        0 20px 44px -12px rgba(15, 23, 42, 0.14),
-        0 4px 16px -4px rgba(15, 23, 42, 0.06),
-        var(--glass-specular-top);
+  /* Brand & Semantic Accents */
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --brand-soft: rgba(37, 99, 235, 0.09);
+  --brand-border: rgba(37, 99, 235, 0.24);
 
-    /* --- Colorful OS Accents (Vibrant & Translucent) --- */
-    --color-brand: #2563eb;
-    --color-brand-hover: #1d4ed8;
-    --color-brand-glass: rgba(37, 99, 235, 0.12);
-    --color-brand-glow: rgba(37, 99, 235, 0.28);
+  /* Meal Period Tints */
+  --morning-fg: #b45309;
+  --morning-bg: rgba(245, 158, 11, 0.07);
+  --morning-border: rgba(245, 158, 11, 0.2);
 
-    /* Pagi: Warm Sunrise Amber */
-    --color-morning-fg: #b45309;
-    --color-morning-glass: rgba(251, 191, 36, 0.18);
-    --color-morning-border: rgba(245, 158, 11, 0.35);
-    --color-morning-dot: #f59e0b;
+  --afternoon-fg: #047857;
+  --afternoon-bg: rgba(16, 185, 129, 0.07);
+  --afternoon-border: rgba(16, 185, 129, 0.2);
 
-    /* Siang: Fresh Matcha Emerald */
-    --color-afternoon-fg: #047857;
-    --color-afternoon-glass: rgba(16, 185, 129, 0.16);
-    --color-afternoon-border: rgba(16, 185, 129, 0.35);
-    --color-afternoon-dot: #10b981;
+  --evening-fg: #4338ca;
+  --evening-bg: rgba(99, 102, 241, 0.07);
+  --evening-border: rgba(99, 102, 241, 0.2);
 
-    /* Malam: Twilight Indigo */
-    --color-evening-fg: #4338ca;
-    --color-evening-glass: rgba(99, 102, 241, 0.16);
-    --color-evening-border: rgba(99, 102, 241, 0.35);
-    --color-evening-dot: #6366f1;
+  /* Status Colors */
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
 
-    /* Playful OS Preset / Gen-Z Berry */
-    --color-berry-fg: #7e22ce;
-    --color-berry-glass: rgba(168, 85, 247, 0.15);
-    --color-berry-border: rgba(168, 85, 247, 0.32);
-
-    /* --- Honest Financial Status --- */
-    --color-status-safe: #10b981;
-    --color-status-safe-glass: rgba(16, 185, 129, 0.16);
-    --color-status-warn: #f59e0b;
-    --color-status-warn-glass: rgba(245, 158, 11, 0.18);
-    --color-status-danger: #ef4444;
-    --color-status-danger-glass: rgba(239, 68, 68, 0.16);
-
-    /* --- Apple Liquid Physics Curves --- */
-    /* Critically damped (damping 1.0): respons instan, mendarat mulus tanpa memantul berlebihan */
-    --ease-liquid-settle: cubic-bezier(0.23, 1, 0.32, 1);
-    /* Momentum spring (damping ~0.8): pantulan organik halus untuk tombol pill & badge */
-    --ease-liquid-bounce: cubic-bezier(0.22, 1.35, 0.36, 1);
-    /* Drawer / Sheet trajectory */
-    --ease-liquid-sheet: cubic-bezier(0.32, 0.72, 0, 1);
-
-    /* --- Radius Scale --- */
-    --radius-chip: 0.75rem;
-    /* 12px */
-    --radius-card: 1.25rem;
-    /* 20px */
-    --radius-panel: 1.5rem;
-    /* 24px */
-    --radius-pill: 9999px;
+  /* Motion Timing */
+  --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ==========================================================================
-   DARK LIQUID GLASS MODE (Otomatis mengikuti OS atau data-theme="dark")
-   ========================================================================== */
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-        --color-ink-primary: #f8fafc;
-        --color-ink-secondary: #cbd5e1;
-        --color-ink-muted: #94a3b8;
+[data-theme="dark"] {
+  color-scheme: dark;
 
-        --glass-bg-base: rgba(22, 28, 42, 0.66);
-        --glass-bg-elevated: rgba(30, 38, 56, 0.78);
-        --glass-bg-subtle: rgba(18, 23, 36, 0.52);
-        --glass-bg-chrome: rgba(17, 22, 34, 0.78);
+  /* Canvas & Ambient Light (Deep Navy-Obsidian) */
+  --bg-canvas: #080d19;
+  --bg-ambient-1: rgba(37, 99, 235, 0.12);
+  --bg-ambient-2: rgba(56, 189, 248, 0.06);
 
-        --glass-border: rgba(255, 255, 255, 0.14);
-        --glass-border-outer: rgba(0, 0, 0, 0.45);
-        --glass-specular-top: inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+  /* Frosted Dark Surfaces */
+  --glass-panel: rgba(15, 23, 42, 0.84);
+  --glass-card: #121c31;
+  --glass-card-sheen: linear-gradient(
+    145deg,
+    rgba(26, 38, 64, 0.96) 0%,
+    rgba(16, 25, 45, 0.96) 100%
+  );
+  --glass-card-subtle: #0d1526;
+  --glass-pill: #18233c;
+  --glass-nav: rgba(13, 20, 36, 0.82);
 
-        --color-brand: #60a5fa;
-        --color-brand-hover: #93c5fd;
-        --color-brand-glass: rgba(96, 165, 250, 0.18);
+  /* Dark Specular Rim & Elevation */
+  --border-subtle: rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(148, 163, 184, 0.22);
+  --specular-edge: inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  --shadow-panel:
+    0 16px 38px -12px rgba(0, 0, 0, 0.5), 0 2px 8px -2px rgba(0, 0, 0, 0.3);
+  --shadow-card:
+    0 6px 18px -6px rgba(0, 0, 0, 0.4), 0 1px 3px 0 rgba(0, 0, 0, 0.25);
+  --shadow-float: 0 20px 44px -10px rgba(0, 0, 0, 0.65);
 
-        --color-morning-fg: #fcd34d;
-        --color-morning-glass: rgba(245, 158, 11, 0.2);
+  /* Typography Ink */
+  --ink-primary: #f8fafc;
+  --ink-secondary: #94a3b8;
+  --ink-muted: #64748b;
 
-        --color-afternoon-fg: #6ee7b7;
-        --color-afternoon-glass: rgba(16, 185, 129, 0.2);
+  /* Brand & Semantic Accents */
+  --brand: #3b82f6;
+  --brand-hover: #60a5fa;
+  --brand-soft: rgba(59, 130, 246, 0.14);
+  --brand-border: rgba(59, 130, 246, 0.3);
 
-        --color-evening-fg: #a5b4fc;
-        --color-evening-glass: rgba(99, 102, 241, 0.22);
+  /* Meal Period Tints */
+  --morning-fg: #fbbf24;
+  --morning-bg: rgba(245, 158, 11, 0.1);
+  --morning-border: rgba(245, 158, 11, 0.22);
 
-        --color-berry-fg: #d8b4fe;
-        --color-berry-glass: rgba(168, 85, 247, 0.22);
-    }
+  --afternoon-fg: #34d399;
+  --afternoon-bg: rgba(16, 185, 129, 0.1);
+  --afternoon-border: rgba(16, 185, 129, 0.22);
+
+  --evening-fg: #a5b4fc;
+  --evening-bg: rgba(99, 102, 241, 0.11);
+  --evening-border: rgba(99, 102, 241, 0.24);
+
+  /* Status Colors */
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #f87171;
 }

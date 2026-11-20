@@ -10,6 +10,7 @@ interface MealSlotCardProps {
     readonly day: number;
     readonly dayPlan: DaySchedule;
     readonly catalogMap: ReadonlyMap<string, CatalogItem>;
+    readonly pendingItem?: CatalogItem | null;
     readonly onDropItem: (day: number, period: MealPeriod, itemId: string) => void;
     readonly onUpdatePortion: (
         day: number,
@@ -25,81 +26,111 @@ const PERIOD_CONFIG: readonly {
     readonly label: string;
     readonly slotTheme: 'pagi' | 'siang' | 'malam';
 }[] = [
-        { key: 'breakfast', label: 'PAGI', slotTheme: 'pagi' },
-        { key: 'lunch', label: 'SIANG', slotTheme: 'siang' },
-        { key: 'dinner', label: 'MALAM', slotTheme: 'malam' },
+        { key: 'breakfast', label: 'Pagi', slotTheme: 'pagi' },
+        { key: 'lunch', label: 'Siang', slotTheme: 'siang' },
+        { key: 'dinner', label: 'Malam', slotTheme: 'malam' },
     ];
 
 export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
-    ({ day, dayPlan, catalogMap, onDropItem, onUpdatePortion, onClearDay }) => {
+    ({
+        day,
+        dayPlan,
+        catalogMap,
+        pendingItem = null,
+        onDropItem,
+        onUpdatePortion,
+        onClearDay,
+    }) => {
         const [dragOverPeriod, setDragOverPeriod] = useState<MealPeriod | null>(null);
 
-        const dayEstimatedCost = PERIOD_CONFIG.reduce((sum, { key }) => {
-            const entries = dayPlan[key];
-            return (
-                sum +
-                entries.reduce((inner, entry) => {
-                    const item = catalogMap.get(entry.itemId);
-                    if (!item) return inner;
-                    return (
-                        inner +
-                        (item.packPrice / Math.max(1, item.portionsPerPack)) * entry.portions
-                    );
-                }, 0)
-            );
-        }, 0);
+        const periodCosts: Record<MealPeriod, number> = {
+            breakfast: 0,
+            lunch: 0,
+            dinner: 0,
+        };
+        let dayEstimatedCost = 0;
+        let hasAnyEntry = false;
 
-        const hasAnyEntry = PERIOD_CONFIG.some(({ key }) => dayPlan[key].length > 0);
+        for (const { key } of PERIOD_CONFIG) {
+            const entries = dayPlan[key];
+            if (entries.length > 0) hasAnyEntry = true;
+            for (const entry of entries) {
+                const item = catalogMap.get(entry.itemId);
+                if (item) {
+                    const cost =
+                        (item.packPrice / Math.max(1, item.portionsPerPack)) * entry.portions;
+                    periodCosts[key] += cost;
+                    dayEstimatedCost += cost;
+                }
+            }
+        }
+
+        const isSelectingSlot = Boolean(pendingItem);
 
         return (
-            <article
-                data-active={hasAnyEntry}
-                className="mf-day-card"
-            >
+            <article data-active={hasAnyEntry} className="mf-day-card">
                 {/* Day Header */}
-                <div className="flex items-center justify-between border-b border-black/8 pb-2.5 dark:border-white/10">
+                <header className="flex items-center justify-between border-b border-(--border-subtle) pb-2.5">
                     <div className="flex items-center gap-2">
                         <span
-                            className={`tabular-nums flex h-6.5 w-6.5 items-center justify-center rounded-xl text-xs font-extrabold shadow-2xs transition-colors ${hasAnyEntry
-                                    ? 'bg-linear-to-br from-blue-600 to-indigo-600 text-white'
-                                    : 'bg-white/80 text-ink-secondary border border-black/8 dark:bg-white/10 dark:border-white/10'
+                            className={`tabular-nums flex h-6.5 w-6.5 items-center justify-center rounded-lg text-xs font-extrabold transition-colors ${hasAnyEntry
+                                    ? 'bg-brand text-white'
+                                    : 'border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary'
                                 }`}
                         >
                             {day}
                         </span>
-                        <span className="text-xs font-bold tracking-tight text-ink-primary">
+                        <h3 className="text-[13px] font-bold tracking-tight text-ink-primary">
                             Hari ke-{day}
-                        </span>
+                        </h3>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                        <span className="tabular-nums text-xs font-bold text-ink-primary">
+                    <div className="flex items-center gap-1">
+                        <span className="tabular-nums text-xs font-bold text-ink-secondary">
                             {formatIdr(dayEstimatedCost)}
                         </span>
                         {hasAnyEntry && (
                             <button
                                 type="button"
                                 onClick={() => onClearDay(day)}
-                                title="Kosongkan hari ini"
+                                title={`Kosongkan jadwal hari ke-${day}`}
                                 aria-label={`Kosongkan jadwal hari ke-${day}`}
-                                className="flex h-6.5 w-6.5 items-center justify-center rounded-full text-ink-muted transition-all duration-150 hover:bg-red-500/12 hover:text-red-600 active:scale-90 dark:hover:text-red-400"
+                                className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
                             >
                                 <Trash2 className="h-3.5 w-3.5" />
                             </button>
                         )}
                     </div>
-                </div>
+                </header>
 
-                {/* Colorful Liquid Meal Slots */}
-                <div className="space-y-2.5">
+                {/* Meal Slots (Pagi, Siang, Malam) */}
+                <div className="mt-3 space-y-2.5">
                     {PERIOD_CONFIG.map(({ key, label, slotTheme }) => {
                         const entries = dayPlan[key];
                         const isOver = dragOverPeriod === key;
+                        const slotCost = periodCosts[key];
 
                         return (
                             <div
                                 key={key}
                                 data-slot={slotTheme}
+                                data-selectable={isSelectingSlot}
+                                role={isSelectingSlot ? 'button' : undefined}
+                                tabIndex={isSelectingSlot ? 0 : undefined}
+                                onClick={() => {
+                                    if (pendingItem) {
+                                        onDropItem(day, key, pendingItem.id);
+                                    }
+                                }}
+                                onKeyDown={(e) => {
+                                    if (
+                                        pendingItem &&
+                                        (e.key === 'Enter' || e.key === ' ')
+                                    ) {
+                                        e.preventDefault();
+                                        onDropItem(day, key, pendingItem.id);
+                                    }
+                                }}
                                 onDragOver={(e) => {
                                     e.preventDefault();
                                     if (dragOverPeriod !== key) setDragOverPeriod(key);
@@ -111,47 +142,61 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                     const itemId = e.dataTransfer.getData('text/plain');
                                     if (itemId) onDropItem(day, key, itemId);
                                 }}
-                                className={`mf-meal-slot ${isOver
-                                        ? 'scale-[1.01] ring-2 ring-brand shadow-md'
-                                        : ''
-                                    }`}
+                                className={`mf-meal-slot ${isOver ? 'ring-2 ring-brand' : ''}`}
                             >
-                                <div className="flex items-center justify-between">
+                                <div className="flex items-center justify-between gap-2">
                                     <span data-slot={slotTheme} className="mf-slot-pill">
                                         {label}
                                     </span>
-                                    <span className="tabular-nums text-[10px] font-semibold text-ink-muted">
-                                        {entries.length} item
-                                    </span>
+                                    {isSelectingSlot ? (
+                                        <span className="text-[10px] font-extrabold text-brand">
+                                            + Klik untuk pasang
+                                        </span>
+                                    ) : (
+                                        entries.length > 0 && (
+                                            <span className="tabular-nums text-[10px] font-bold text-ink-secondary">
+                                                {formatIdr(slotCost)}
+                                            </span>
+                                        )
+                                    )}
                                 </div>
 
                                 {entries.length === 0 ? (
-                                    <p className="py-2.5 text-center text-[11px] font-medium text-ink-muted/80">
-                                        Drop atau klik + Pasang
+                                    <p className="py-2 text-center text-[11px] font-medium text-ink-muted/75">
+                                        {isSelectingSlot
+                                            ? `Pasang ke ${label}`
+                                            : 'Kosong'}
                                     </p>
                                 ) : (
-                                    <div className="mt-2 space-y-1.5">
+                                    <ul
+                                        onClick={(e) => {
+                                            if (!isSelectingSlot) e.stopPropagation();
+                                        }}
+                                        className="mt-2 space-y-1.5"
+                                    >
                                         {entries.map((entry) => {
                                             const item = catalogMap.get(entry.itemId);
                                             if (!item) return null;
                                             const dot = CATEGORY_META[item.category].dotColor;
 
                                             return (
-                                                <div key={entry.itemId} className="mf-meal-chip">
+                                                <li key={entry.itemId} className="mf-meal-chip">
                                                     <div className="flex min-w-0 items-center gap-1.5">
                                                         <span
                                                             className={`h-2 w-2 shrink-0 rounded-full ${dot}`}
                                                         />
                                                         <span
                                                             title={item.name}
-                                                            className="truncate text-[11.5px] font-semibold text-ink-primary"
+                                                            className="truncate text-xs font-medium text-ink-primary"
                                                         >
                                                             {item.name}
                                                         </span>
                                                     </div>
 
-                                                    {/* Liquid Tactile Stepper */}
-                                                    <div className="mf-stepper">
+                                                    <div
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className="mf-stepper"
+                                                    >
                                                         <button
                                                             type="button"
                                                             onClick={() =>
@@ -162,7 +207,7 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                                         >
                                                             <Minus className="h-3 w-3" />
                                                         </button>
-                                                        <span className="tabular-nums min-w-5.5 text-center text-[11px] font-extrabold text-ink-primary">
+                                                        <span className="tabular-nums min-w-5 text-center text-[11px] font-bold text-ink-primary">
                                                             {entry.portions}x
                                                         </span>
                                                         <button
@@ -176,10 +221,10 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                                             <Plus className="h-3 w-3" />
                                                         </button>
                                                     </div>
-                                                </div>
+                                                </li>
                                             );
                                         })}
-                                    </div>
+                                    </ul>
                                 )}
                             </div>
                         );

@@ -15,6 +15,10 @@ export const GrocerySummaryPanel: React.FC<GrocerySummaryPanelProps> = ({
     const [filterMode, setFilterMode] = useState<'all' | 'leftover'>('all');
     const [copied, setCopied] = useState(false);
 
+    const leftoverCount = summary.lineItems.filter(
+        (i) => i.leftoverPortions > 0,
+    ).length;
+
     const visibleItems =
         filterMode === 'leftover'
             ? summary.lineItems.filter((line) => line.leftoverPortions > 0)
@@ -24,9 +28,9 @@ export const GrocerySummaryPanel: React.FC<GrocerySummaryPanelProps> = ({
         if (summary.lineItems.length === 0) return;
         const lines = summary.lineItems.map(
             (line, idx) =>
-                `${idx + 1}. ${line.item.name} — Beli ${line.packsToBuy}x (${line.item.packUnit}) = ${formatIdr(line.retailCheckoutCost)} [Pakai ${line.usedPortions}/${line.totalPurchasedPortions} porsi]`,
+                `${idx + 1}. ${line.item.name} — Beli ${line.packsToBuy} kemasan (${line.item.packUnit}) = ${formatIdr(line.retailCheckoutCost)} | Kebutuhan ${line.usedPortions} porsi, sisa stok ${line.leftoverPortions} porsi`,
         );
-        const header = `Daftar Belanja Mealflow (Total: ${formatIdr(summary.totalRetailCheckoutCost)})\n`;
+        const header = `Daftar Belanja Bulanan (Total: ${formatIdr(summary.totalRetailCheckoutCost)})\n`;
         try {
             await navigator.clipboard.writeText(header + lines.join('\n'));
             setCopied(true);
@@ -46,10 +50,10 @@ export const GrocerySummaryPanel: React.FC<GrocerySummaryPanelProps> = ({
                     </div>
                     <div>
                         <h2 className="text-sm font-extrabold tracking-tight text-ink-primary">
-                            Rekap Belanja Realistis
+                            Daftar Belanja
                         </h2>
                         <p className="text-[11px] font-medium text-ink-muted">
-                            Pembulatan kemasan grosir otomatis
+                            Kebutuhan kemasan & sisa stok 31 hari
                         </p>
                     </div>
                 </div>
@@ -59,46 +63,56 @@ export const GrocerySummaryPanel: React.FC<GrocerySummaryPanelProps> = ({
                     onClick={handleCopyList}
                     disabled={summary.lineItems.length === 0}
                     data-variant={copied ? 'emerald' : undefined}
-                    className="mf-liquid-pill min-h-8.5 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
+                    className="mf-liquid-pill h-8.5 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
                 >
                     {copied ? (
                         <Check className="h-3.5 w-3.5" />
                     ) : (
                         <Copy className="h-3.5 w-3.5 text-brand" />
                     )}
-                    <span>{copied ? 'Tersalin' : 'Salin List'}</span>
+                    <span>{copied ? 'Tersalin' : 'Salin'}</span>
                 </button>
             </div>
 
-            {/* Colorful Category Subtotals */}
-            <div className="mt-3.5 grid grid-cols-2 gap-2.5">
-                <div className="rounded-2xl border border-amber-500/25 bg-linear-to-brrom-amber-500/12 to-white/60 p-3 dark:to-white/5">
-                    <span className="text-[11px] font-semibold text-amber-800 dark:text-amber-300">
-                        Sub Makanan
+            {/* Ringkasan Total Belanja */}
+            <div className="mt-3.5 rounded-2xl border border-(--brand-border) bg-brand-glass p-3.5">
+                <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-xs font-bold text-ink-secondary">
+                        Total Belanja ({summary.lineItems.length} item)
                     </span>
-                    <p className="tabular-nums mt-0.5 text-sm font-extrabold text-ink-primary">
-                        {formatIdr(summary.foodCheckoutCost)}
-                    </p>
+                    <span className="tabular-nums text-base font-extrabold tracking-tight text-ink-primary">
+                        {formatIdr(summary.totalRetailCheckoutCost)}
+                    </span>
                 </div>
 
-                <div className="rounded-2xl border border-blue-500/25 bg-linear-to-br from-blue-500/12 to-white/60 p-3 dark:to-white/5">
-                    <span className="text-[11px] font-semibold text-blue-800 dark:text-blue-300">
-                        Sub Minuman
-                    </span>
-                    <p className="tabular-nums mt-0.5 text-sm font-extrabold text-ink-primary">
-                        {formatIdr(summary.drinkCheckoutCost)}
-                    </p>
+                <div className="mt-2.5 grid grid-cols-2 gap-2 border-t border-(--border-subtle) pt-2.5">
+                    <div>
+                        <span className="block text-[10px] font-semibold text-ink-muted">
+                            Belanja Makanan
+                        </span>
+                        <span className="tabular-nums text-xs font-extrabold text-morning-fg">
+                            {formatIdr(summary.foodCheckoutCost)}
+                        </span>
+                    </div>
+                    <div className="text-right">
+                        <span className="block text-[10px] font-semibold text-ink-muted">
+                            Belanja Minuman
+                        </span>
+                        <span className="tabular-nums text-xs font-extrabold text-brand">
+                            {formatIdr(summary.drinkCheckoutCost)}
+                        </span>
+                    </div>
                 </div>
             </div>
 
             {/* Filter Pills */}
-            <div className="mt-3 flex items-center gap-1.5">
+            <div className="mt-3 grid grid-cols-2 gap-1.5">
                 <button
                     type="button"
                     onClick={() => setFilterMode('all')}
-                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all duration-150 active:scale-95 ${filterMode === 'all'
+                    className={`h-8 rounded-xl text-xs font-bold transition-colors duration-150 active:scale-97 ${filterMode === 'all'
                             ? 'bg-slate-900 text-white shadow-2xs dark:bg-white dark:text-slate-900'
-                            : 'border border-black/6 bg-white/55 text-ink-secondary hover:bg-white/85 hover:text-ink-primary dark:border-white/10 dark:bg-white/6'
+                            : 'border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary hover:text-ink-primary'
                         }`}
                 >
                     Semua ({summary.lineItems.length})
@@ -106,74 +120,113 @@ export const GrocerySummaryPanel: React.FC<GrocerySummaryPanelProps> = ({
                 <button
                     type="button"
                     onClick={() => setFilterMode('leftover')}
-                    className={`rounded-full px-3 py-1 text-xs font-bold transition-all duration-150 active:scale-95 ${filterMode === 'leftover'
+                    className={`h-8 rounded-xl text-xs font-bold transition-colors duration-150 active:scale-97 ${filterMode === 'leftover'
                             ? 'bg-slate-900 text-white shadow-2xs dark:bg-white dark:text-slate-900'
-                            : 'border border-black/6 bg-white/55 text-ink-secondary hover:bg-white/85 hover:text-ink-primary dark:border-white/10 dark:bg-white/6'
+                            : 'border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary hover:text-ink-primary'
                         }`}
                 >
-                    Sisa Stok (
-                    {summary.lineItems.filter((i) => i.leftoverPortions > 0).length})
+                    Bersisa ({leftoverCount})
                 </button>
             </div>
 
             {/* Scrollable Line Items */}
-            <div className="mf-scroll-panel mf-scrollbar mt-3.5">
+            <div className="mf-scroll-panel mt-3.5">
                 {visibleItems.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-black/15 bg-white/40 px-4 py-9 text-center dark:border-white/15 dark:bg-white/5">
+                    <div className="rounded-2xl border border-dashed border-(--border-subtle) bg-(--glass-card-subtle) px-4 py-9 text-center">
                         <PackageCheck className="mx-auto h-7 w-7 text-ink-muted" />
                         <p className="mt-2 text-xs font-bold text-ink-secondary">
-                            Belum ada item terpasang di kalender
+                            Belum ada daftar belanja
                         </p>
                         <p className="mt-0.5 text-[11px] leading-relaxed text-ink-muted">
-                            Pasangkan menu dari katalog untuk melihat hitungan kemasan otomatis.
+                            Pasangkan bahan atau menu ke kalender untuk menghitung total belanja dan sisa stok.
                         </p>
                     </div>
                 ) : (
-                    visibleItems.map((line) => (
-                        <div
-                            key={line.item.id}
-                            className="rounded-2xl border border-white/70 bg-white/70 p-3.5 shadow-2xs outline-1 outline-black/6 transition-transform duration-200 hover:-translate-y-0.5 dark:border-white/12 dark:bg-white/6 dark:outline-white/8"
-                        >
-                            <div className="flex items-start justify-between gap-2">
-                                <div className="min-w-0">
-                                    <p
-                                        title={line.item.name}
-                                        className="truncate text-xs font-bold tracking-tight text-ink-primary"
-                                    >
-                                        {line.item.name}
-                                    </p>
-                                    <p className="mt-0.5 text-[11px] font-medium text-ink-secondary">
-                                        Beli{' '}
-                                        <strong className="font-extrabold text-ink-primary">
-                                            {line.packsToBuy}x
-                                        </strong>{' '}
-                                        ({line.item.packUnit})
-                                    </p>
+                    visibleItems.map((line) => {
+                        const leftoverCost = Math.max(
+                            0,
+                            Math.round(line.retailCheckoutCost - line.consumedCost),
+                        );
+
+                        return (
+                            <div
+                                key={line.item.id}
+                                style={{
+                                    contentVisibility: 'auto',
+                                    containIntrinsicSize: '116px',
+                                }}
+                                className="mf-glass-card p-3.5"
+                            >
+                                {/* Baris 1: Nama & Total Harga Item */}
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="min-w-0">
+                                        <p
+                                            title={line.item.name}
+                                            className="truncate text-xs font-extrabold tracking-tight text-ink-primary"
+                                        >
+                                            {line.item.name}
+                                        </p>
+                                        <p className="mt-0.5 text-[11px] font-medium text-ink-muted">
+                                            {line.item.packUnit} · {formatIdr(line.item.packPrice)}/kemasan
+                                        </p>
+                                    </div>
+                                    <span className="tabular-nums shrink-0 text-xs font-extrabold text-ink-primary">
+                                        {formatIdr(line.retailCheckoutCost)}
+                                    </span>
                                 </div>
-                                <span className="tabular-nums shrink-0 text-xs font-extrabold text-ink-primary">
-                                    {formatIdr(line.retailCheckoutCost)}
-                                </span>
-                            </div>
 
-                            {/* Utilization Progress Bar */}
-                            <div className="mf-budget-track mt-2.5 h-1.5">
-                                <div
-                                    className="mf-budget-fill"
-                                    style={{ width: `${line.utilizationPercent}%` }}
-                                />
-                            </div>
+                                {/* Baris 2: Rincian Beli vs Kebutuhan Sebulan vs Sisa */}
+                                <div className="mt-2.5 grid grid-cols-3 gap-1.5 rounded-xl border border-(--border-subtle) bg-(--glass-card-subtle) p-2 text-center">
+                                    <div>
+                                        <span className="block text-[10px] font-medium text-ink-muted">
+                                            Harus Beli
+                                        </span>
+                                        <span className="tabular-nums text-[11px] font-extrabold text-ink-primary">
+                                            {line.packsToBuy} kemasan
+                                        </span>
+                                        <span className="tabular-nums block text-[10px] text-ink-muted">
+                                            ({line.totalPurchasedPortions} porsi)
+                                        </span>
+                                    </div>
 
-                            <div className="tabular-nums mt-2 flex items-center justify-between text-[11px]">
-                                <span className="font-medium text-ink-secondary">
-                                    Pakai {line.usedPortions} / {line.totalPurchasedPortions} porsi
-                                </span>
-                                <span className="font-bold text-brand">
-                                    Sisa {line.leftoverPortions} porsi (
-                                    {100 - line.utilizationPercent}%)
-                                </span>
+                                    <div className="border-x border-(--border-subtle) px-1">
+                                        <span className="block text-[10px] font-medium text-ink-muted">
+                                            Terpakai
+                                        </span>
+                                        <span className="tabular-nums text-[11px] font-extrabold text-brand">
+                                            {line.usedPortions} porsi
+                                        </span>
+                                        <span className="tabular-nums block text-[10px] text-ink-muted">
+                                            ({line.utilizationPercent}%)
+                                        </span>
+                                    </div>
+
+                                    <div>
+                                        <span className="block text-[10px] font-medium text-ink-muted">
+                                            Sisa Stok
+                                        </span>
+                                        <span
+                                            className={`tabular-nums text-[11px] font-extrabold ${line.leftoverPortions === 0
+                                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                                    : line.isLowUtilization
+                                                        ? 'text-morning-fg'
+                                                        : 'text-ink-primary'
+                                                }`}
+                                        >
+                                            {line.leftoverPortions === 0
+                                                ? 'Habis pas'
+                                                : `${line.leftoverPortions} porsi`}
+                                        </span>
+                                        <span className="tabular-nums block text-[10px] text-ink-muted">
+                                            {line.leftoverPortions > 0
+                                                ? formatIdr(leftoverCost)
+                                                : '0 sisa'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </div>
         </div>

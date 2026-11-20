@@ -22,44 +22,54 @@ export interface CatalogItem {
     readonly name: string;
     readonly kind: ItemKind;
     readonly category: CatalogCategory;
-    /** Retail purchase unit label, e.g. "1 Kg", "1 Ekor", "1 Porsi" */
+    /** Satuan beli ritel, mis. "1 Kg", "1 Ekor", "1 Porsi" */
     readonly packUnit: string;
-    /** Retail price per purchase unit in IDR */
+    /** Harga ritel per satuan beli dalam IDR */
     readonly packPrice: number;
-    /** How many meal portions one purchase unit yields */
+    /** Jumlah porsi yang dihasilkan dari 1 kemasan */
     readonly portionsPerPack: number;
-    /** Optional short note on prep or nutrition */
+    /** Catatan opsional terkait persiapan atau nutrisi */
     readonly note?: string;
-    /** True if created by the user */
+    /** True jika dibuat sendiri oleh pengguna */
     readonly isCustom?: boolean;
 }
 
 export interface ScheduledEntry {
     readonly itemId: string;
-    /** Number of portions assigned to this slot (e.g., 1 for solo, 2 for two people) */
+    /** Jumlah porsi pada slot ini (mis. 1 untuk sendiri, 2 untuk berdua) */
     readonly portions: number;
 }
 
 export type DaySchedule = Record<MealPeriod, readonly ScheduledEntry[]>;
 
-/** Map of day number (1..31) to its three meal slots */
+/** Peta tanggal (1..31) ke tiga waktu makan */
 export type MonthlySchedule = Record<number, DaySchedule>;
 
 export interface GroceryLineItem {
     readonly item: CatalogItem;
     readonly usedPortions: number;
-    /** Exact pro-rata cost based on used portions */
+    /** Biaya pro-rata sesuai porsi yang benar-benar dimakan */
     readonly consumedCost: number;
-    /** Realistic retail packs needed (rounded up) */
+    /** Jumlah kemasan utuh yang wajib dibeli (dibulatkan ke atas) */
     readonly packsToBuy: number;
-    /** Total retail checkout cost for whole packs */
+    /** Total biaya kasir untuk membeli kemasan utuh */
     readonly retailCheckoutCost: number;
-    /** Total portions yielded by purchased packs */
+    /** Total porsi dari kemasan yang dibeli */
     readonly totalPurchasedPortions: number;
-    /** Remaining portions left in pantry at day 31 */
+    /** Sisa porsi stok di akhir hari ke-31 */
     readonly leftoverPortions: number;
-    /** Percentage of purchased stock actually consumed (0..100) */
+    /** Persentase efisiensi pemakaian stok (0..100) */
     readonly utilizationPercent: number;
+    /** True jika sisa stok >= 50% dari 1 kemasan (potensi mubazir) */
+    readonly isLowUtilization: boolean;
+}
+
+export interface WeeklyCostSummary {
+    readonly week: number;
+    readonly label: string;
+    readonly activeDays: number;
+    readonly totalPortions: number;
+    readonly consumedCost: number;
 }
 
 export interface BudgetSummary {
@@ -70,6 +80,18 @@ export interface BudgetSummary {
     readonly totalLeftoverValue: number;
     readonly foodCheckoutCost: number;
     readonly drinkCheckoutCost: number;
+    /** Distribusi biaya pro-rata per waktu makan (Pagi, Siang, Malam) */
+    readonly periodConsumedCost: Readonly<Record<MealPeriod, number>>;
+    /** Distribusi biaya kasir per kategori bahan */
+    readonly categoryCheckoutCost: Readonly<Partial<Record<CatalogCategory, number>>>;
+    /** Ringkasan biaya & porsi per minggu (Minggu 1..5) */
+    readonly weeklyBreakdown: readonly WeeklyCostSummary[];
+    /** Jumlah hari (1..31) yang sudah terisi minimal 1 menu */
+    readonly activeDaysCount: number;
+    /** Rata-rata biaya pro-rata per hari aktif */
+    readonly averageDailyCost: number;
+    /** Daftar bahan dengan efisiensi pemakaian rendah (< 50%) */
+    readonly underutilizedItems: readonly GroceryLineItem[];
     readonly targetBudget: number;
     readonly remainingBudget: number;
     readonly budgetUsagePercent: number;

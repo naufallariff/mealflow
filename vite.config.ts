@@ -9,19 +9,24 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'PantryGrid — Visual Meal & Grocery Planner',
-        short_name: 'PantryGrid',
-        description: '31-day meal puzzle & realistic grocery budget planner',
-        theme_color: '#F2F2F7',
-        background_color: '#F2F2F7',
+        name: 'Mealflow — Rencana Makan & Belanja 31 Hari',
+        short_name: 'Mealflow',
+        description: 'Perencana jadwal makan 31 hari dan simulasi daftar belanja bulanan otomatis.',
+        theme_color: '#2563eb',
+        background_color: '#f5f7fb',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }
-        ]
-      }
-    })
-  ]
+          {
+            src: '/favicon.svg',
+            sizes: 'any',
+            type: 'image/svg+xml',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+    }),
+  ],
 });

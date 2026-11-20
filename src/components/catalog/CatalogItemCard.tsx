@@ -1,7 +1,7 @@
 // src/components/catalog/CatalogItemCard.tsx
 
 import React from 'react';
-import { GripVertical, Plus, Trash2 } from 'lucide-react';
+import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { CatalogItem } from '../../types/meal';
 import { CATEGORY_META } from '../../data/default-catalog';
 import { formatIdr } from '../../utils/currency';
@@ -9,12 +9,21 @@ import { formatIdr } from '../../utils/currency';
 interface CatalogItemCardProps {
     readonly item: CatalogItem;
     readonly usedCount: number;
+    readonly isOverridden?: boolean;
     readonly onQuickSchedule: (item: CatalogItem) => void;
+    readonly onEditItem?: (item: CatalogItem) => void;
     readonly onDeleteCustom?: (itemId: string) => void;
 }
 
 export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
-    ({ item, usedCount, onQuickSchedule, onDeleteCustom }) => {
+    ({
+        item,
+        usedCount,
+        isOverridden = false,
+        onQuickSchedule,
+        onEditItem,
+        onDeleteCustom,
+    }) => {
         const meta = CATEGORY_META[item.category];
         const perPortion = Math.round(
             item.packPrice / Math.max(1, item.portionsPerPack),
@@ -49,6 +58,11 @@ export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
                                     {usedCount}x
                                 </span>
                             )}
+                            {isOverridden && (
+                                <span className="shrink-0 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 dark:text-amber-300">
+                                    Diubah
+                                </span>
+                            )}
                         </div>
 
                         <p className="tabular-nums mt-0.5 text-[11px] font-medium text-ink-secondary">
@@ -73,13 +87,24 @@ export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
                 </div>
 
                 <div className="flex shrink-0 items-center gap-1.5">
+                    {onEditItem && (
+                        <button
+                            type="button"
+                            onClick={() => onEditItem(item)}
+                            title="Ubah harga atau porsi"
+                            aria-label={`Ubah ${item.name}`}
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary transition-transform duration-150 hover:text-brand active:scale-90"
+                        >
+                            <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                    )}
                     {item.isCustom && onDeleteCustom && (
                         <button
                             type="button"
                             onClick={() => onDeleteCustom(item.id)}
                             title="Hapus item kustom"
                             aria-label={`Hapus item kustom ${item.name}`}
-                            className="flex h-8 w-8 items-center justify-center rounded-full border border-black/8 bg-white/75 text-red-600 transition-transform duration-150 hover:bg-red-500/12 active:scale-90 dark:border-white/12 dark:bg-white/10 dark:text-red-400"
+                            className="flex h-8 w-8 items-center justify-center rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) text-red-600 transition-transform duration-150 hover:bg-red-500/12 active:scale-90 dark:text-red-400"
                         >
                             <Trash2 className="h-3.5 w-3.5" />
                         </button>

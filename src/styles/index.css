@@ -1,77 +1,60 @@
+/* src/styles/index.css */
+
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./components.css";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --color-ink-primary: var(--ink-primary);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-muted: var(--ink-muted);
+
+  --color-brand: var(--brand);
+  --color-brand-glass: var(--brand-soft);
+
+  --color-morning-fg: var(--morning-fg);
+  --color-morning-glass: var(--morning-bg);
+
+  --color-afternoon-fg: var(--afternoon-fg);
+  --color-afternoon-glass: var(--afternoon-bg);
+
+  --color-evening-fg: var(--evening-fg);
+  --color-evening-glass: var(--evening-bg);
+}
+
 @layer base {
-
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
-
-  html {
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-  }
-
   body {
     margin: 0;
-    width: 100%;
     overflow-x: hidden;
-  }
-
-  .tabular-nums {
-    font-variant-numeric: tabular-nums;
-  }
-}
-
-@layer utilities {
-  .mf-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  .mf-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .mf-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(100, 116, 139, 0.28);
-    border-radius: 9999px;
-  }
-
-  .mf-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(100, 116, 139, 0.45);
+    font-family:
+      -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui,
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-canvas);
+    color: var(--ink-primary);
   }
 }
 
-/* ==========================================================================
-   APPLE ACCESSIBILITY: REDUCED MOTION & REDUCED TRANSPARENCY
-   ========================================================================== */
-@media (prefers-reduced-transparency: reduce) {
-
-  .mf-glass-panel,
-  .mf-glass-card,
-  .mf-navbar,
-  .mf-mobile-dock,
-  .mf-modal-glass {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    background: #ffffff !important;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+/* Radial Theme Wipe Transition (Top-Right to Bottom-Left) */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 9999;
 }
