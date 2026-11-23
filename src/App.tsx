@@ -1,9 +1,8 @@
 // src/App.tsx
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { CalendarDays, CheckSquare, TableProperties } from 'lucide-react';
 import type { CatalogItem } from './types/meal';
-import { WEEKLY_PRESETS } from './data/default-catalog';
-import { createEmptyMonthlySchedule } from './utils/budget-engine';
 import { useMealflowStore } from './hooks/use-mealflow-store';
 import { useTheme } from './hooks/use-theme';
 import { FloatingNavbar } from './components/layout/FloatingNavbar';
@@ -13,30 +12,43 @@ import { BudgetTargetCard } from './components/summary/BudgetTargetCard';
 import { GrocerySummaryPanel } from './components/summary/GrocerySummaryPanel';
 import { CatalogPanel } from './components/catalog/CatalogPanel';
 import { WeeklyCalendarGrid } from './components/calendar/WeeklyCalendarGrid';
+import { MonthlyFrequencyPlanner } from './components/planner/MonthlyFrequencyPlanner';
+import { OngoingDashboardView } from './components/dashboard/OngoingDashboardView';
 import { ConfirmDialog, type ConfirmDialogConfig } from './components/ui/ConfirmDialog';
 
 export function App() {
   const { theme, toggleTheme } = useTheme();
   const {
+    activeTab,
+    setActiveTab,
     catalog,
     catalogMap,
     overriddenIds,
+    bundles,
     targetBudget,
     setTargetBudget,
     activeWeek,
     setActiveWeek,
     schedule,
+    checkedItemIds,
     budgetSummary,
+    setItemMonthlyPortions,
+    adjustItemMonthlyPortions,
+    toggleCheckedItem,
+    clearCheckedItems,
     updateCatalogItem,
     resetCatalogItem,
     createCustomItem,
     removeOrHideCatalogItem,
+    saveMealBundle,
+    distributeUnscheduledToCalendar,
     assignItemToSlot,
     updateSlotPortion,
     clearDaySchedule,
     copyWeekToNext,
     duplicateWeekToMonth,
-    replaceFullSchedule,
+    exportProfileJson,
+    importProfileJson,
     resetAllWorkspace,
   } = useMealflowStore();
 
@@ -61,38 +73,20 @@ export function App() {
     return counts;
   }, [budgetSummary.lineItems]);
 
-  const applyPreset = useCallback(
-    (presetId: string) => {
-      const preset = WEEKLY_PRESETS.find((p) => p.id === presetId);
-      if (!preset) return;
-      const next = createEmptyMonthlySchedule(31);
-      for (let day = 1; day <= 31; day += 1) {
-        const weekday = ((day - 1) % 7) + 1;
-        const template = preset.pattern[weekday];
-        if (template) {
-          next[day] = {
-            breakfast: template.breakfast.map((e) => ({ ...e })),
-            lunch: template.lunch.map((e) => ({ ...e })),
-            dinner: template.dinner.map((e) => ({ ...e })),
-          };
-        }
-      }
-      replaceFullSchedule(next);
-      setActiveWeek(1);
+  const handleStartQuickSchedule = useCallback(
+    (item: CatalogItem) => {
+      setPendingItem(item);
+      setActiveTab('calendar');
+      setMobileTab('calendar');
     },
-    [replaceFullSchedule, setActiveWeek],
+    [setActiveTab],
   );
-
-  const handleStartQuickSchedule = useCallback((item: CatalogItem) => {
-    setPendingItem(item);
-    setMobileTab('calendar');
-  }, []);
 
   const handleRequestResetAll = useCallback(() => {
     setConfirmConfig({
-      title: 'Reset Seluruh Jadwal & Target?',
+      title: 'Reset Seluruh Rencana & Target?',
       description:
-        'Semua jadwal makan 31 hari dan target anggaran bulanan akan dikosongkan ke kondisi awal.',
+        'Semua porsi bulanan, jadwal 31 hari, checklist kasir, dan target anggaran akan dikosongkan ke kondisi awal.',
       confirmLabel: 'Ya, Reset Semua',
       tone: 'danger',
       onConfirm: () => {
@@ -110,17 +104,14 @@ export function App() {
         onRequestResetAll={handleRequestResetAll}
       />
 
-      <main className="mf-fluid-container space-y-5 pt-5 sm:space-y-6 sm:pt-6">
-        {/* Top 3-Column Symmetric KPI & Budget Strip */}
+      <main className="mf-fluid-container space-y-5 pt-5 pb-24 sm:space-y-6 sm:pt-6 xl:pb-10">
         <BudgetTargetCard
           summary={budgetSummary}
           targetBudget={targetBudget}
           onChangeTarget={setTargetBudget}
         />
 
-        {/* 3-Column Full-Width Desktop Workspace / Tabbed Mobile View */}
         <div className="mf-workspace-grid">
-          {/* Kolom 1: Katalog */}
           <aside
             className={`${mobileTab === 'catalog' ? 'block' : 'hidden'
               } mf-glass-panel p-4 xl:sticky xl:top-20 xl:block`}
@@ -131,23 +122,18 @@ export function App() {
               overriddenIds={overriddenIds}
               onRequestConfirm={setConfirmConfig}
               onQuickSchedule={handleStartQuickSchedule}
-              onAddCustomItem={({
-                name,
-                kind,
-                category,
-                packUnit,
-                packPrice,
-                portionsPerPack,
-                note,
-              }) =>
+              onAddCustomItem={(item) =>
                 createCustomItem({
-                  name,
-                  kind,
-                  category,
-                  packUnit,
-                  packPrice,
-                  portionsPerPack,
-                  note,
+                  name: item.name,
+                  kind: item.kind,
+                  category: item.category,
+                  consumptionUnit: item.consumptionUnit || '1 porsi',
+                  packUnit: item.packUnit,
+                  packPrice: item.packPrice,
+                  portionsPerPack: item.portionsPerPack,
+                  requiresCooking: item.requiresCooking,
+                  macros: item.macros,
+                  note: item.note,
                 })
               }
               onUpdateCatalogItem={updateCatalogItem}
@@ -156,50 +142,129 @@ export function App() {
             />
           </aside>
 
-          {/* Kolom 2: Kalender 31 Hari */}
           <section
             className={`${mobileTab === 'calendar' ? 'block' : 'hidden'
               } mf-glass-panel min-w-0 p-4 sm:p-5 xl:block`}
           >
-            <WeeklyCalendarGrid
-              schedule={schedule}
-              catalogMap={catalogMap}
-              activeWeek={activeWeek}
-              pendingItem={pendingItem}
-              onRequestConfirm={setConfirmConfig}
-              onCancelPendingItem={() => setPendingItem(null)}
-              onChangeWeek={setActiveWeek}
-              onDropItem={(day, period, itemId) =>
-                assignItemToSlot(day, period, itemId, 1)
-              }
-              onUpdatePortion={updateSlotPortion}
-              onClearDay={clearDaySchedule}
-              onCopyWeekToNext={copyWeekToNext}
-              onDuplicateWeekToMonth={duplicateWeekToMonth}
-              onApplyPreset={applyPreset}
-            />
+            <div
+              role="tablist"
+              aria-label="Mode perencanaan Mealflow"
+              className="mb-4 grid grid-cols-3 gap-1 rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) p-1"
+            >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'planner'}
+                onClick={() => setActiveTab('planner')}
+                className={`flex min-h-11 items-center justify-center gap-1.5 rounded-full px-2 text-xs font-extrabold transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 ${activeTab === 'planner'
+                    ? 'bg-brand text-white shadow-xs'
+                    : 'text-ink-secondary hover:text-ink-primary'
+                  }`}
+              >
+                <TableProperties className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className="sm:hidden">Bulanan</span>
+                <span className="hidden truncate sm:inline">Perencana Bulanan</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'grocery'}
+                onClick={() => setActiveTab('grocery')}
+                className={`flex min-h-11 items-center justify-center gap-1.5 rounded-full px-2 text-xs font-extrabold transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 ${activeTab === 'grocery'
+                    ? 'bg-brand text-white shadow-xs'
+                    : 'text-ink-secondary hover:text-ink-primary'
+                  }`}
+              >
+                <CheckSquare className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className="sm:hidden">Kasir</span>
+                <span className="hidden truncate sm:inline">Dashboard & Kasir</span>
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'calendar'}
+                onClick={() => setActiveTab('calendar')}
+                className={`flex min-h-11 items-center justify-center gap-1.5 rounded-full px-2 text-xs font-extrabold transition-colors cursor-pointer focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 ${activeTab === 'calendar'
+                    ? 'bg-brand text-white shadow-xs'
+                    : 'text-ink-secondary hover:text-ink-primary'
+                  }`}
+              >
+                <CalendarDays className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                <span className="sm:hidden">Kalender</span>
+                <span className="hidden truncate sm:inline">Kalender 31 Hari</span>
+              </button>
+            </div>
+
+            {activeTab === 'planner' && (
+              <MonthlyFrequencyPlanner
+                catalog={catalog}
+                catalogMap={catalogMap}
+                bundles={bundles}
+                summary={budgetSummary}
+                onSetPortions={setItemMonthlyPortions}
+                onAdjustPortions={adjustItemMonthlyPortions}
+                onSaveBundle={saveMealBundle}
+                onDistributeToCalendar={distributeUnscheduledToCalendar}
+              />
+            )}
+
+            {activeTab === 'grocery' && (
+              <OngoingDashboardView
+                summary={budgetSummary}
+                checkedItemIds={checkedItemIds}
+                onToggleChecked={toggleCheckedItem}
+                onClearChecked={clearCheckedItems}
+                onSwitchToPlanner={() => setActiveTab('planner')}
+                onExportJson={exportProfileJson}
+                onImportJson={importProfileJson}
+              />
+            )}
+
+            {activeTab === 'calendar' && (
+              <WeeklyCalendarGrid
+                schedule={schedule}
+                catalogMap={catalogMap}
+                activeWeek={activeWeek}
+                pendingItem={pendingItem}
+                unscheduledCount={budgetSummary.totalUnscheduledPortions}
+                onRequestConfirm={setConfirmConfig}
+                onCancelPendingItem={() => setPendingItem(null)}
+                onChangeWeek={setActiveWeek}
+                onDropItem={(day, period, itemId) =>
+                  assignItemToSlot(day, period, itemId, 1)
+                }
+                onUpdatePortion={updateSlotPortion}
+                onClearDay={clearDaySchedule}
+                onCopyWeekToNext={copyWeekToNext}
+                onDuplicateWeekToMonth={duplicateWeekToMonth}
+                onDistributeUnscheduled={distributeUnscheduledToCalendar}
+              />
+            )}
           </section>
 
-          {/* Kolom 3: Daftar Belanja */}
           <aside
             className={`${mobileTab === 'summary' ? 'block' : 'hidden'
               } mf-glass-panel p-4 xl:sticky xl:top-20 xl:block`}
           >
-            <GrocerySummaryPanel summary={budgetSummary} />
+            <GrocerySummaryPanel
+              summary={budgetSummary}
+              checkedItemIds={checkedItemIds}
+              onToggleChecked={toggleCheckedItem}
+              onSwitchToCatalog={() => setMobileTab('catalog')}
+            />
           </aside>
         </div>
       </main>
 
-      {/* Bottom-Right Peek Guide Tab */}
       <FloatingGuideWidget />
 
-      {/* Mobile Floating Dock */}
       <MobileBottomNav
         activeTab={mobileTab}
         onChangeTab={setMobileTab}
       />
 
-      {/* Centralized Decision Confirmation Dialog */}
       <ConfirmDialog
         config={confirmConfig}
         onClose={() => setConfirmConfig(null)}
