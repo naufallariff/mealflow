@@ -6,8 +6,12 @@ import type {
     CatalogItem,
     DaySchedule,
     GroceryLineItem,
+    MealBundle,
     MealPeriod,
     MonthlySchedule,
+    PantrySuggestion,
+    ScheduledEntry,
+    UnscheduledPortionMap,
     WeeklyCostSummary,
 } from '../types/meal';
 
@@ -47,15 +51,60 @@ function getWeekIndexForDay(day: number): number {
 }
 
 /**
- * Engine deterministik single-pass O(N) untuk mengagregasi jadwal 31 hari
- * menjadi kebutuhan kemasan ritel, biaya kasir, sisa stok, dan analitik mingguan.
+ * Menghitung saran kebutuhan minyak goreng dan bumbu dasar secara otomatis
+ * berdasarkan jumlah sesi masak bahan mentah (protein & sayur) dalam sebulan.
  */
+function buildSmartPantrySuggestions(
+    totalCookingSessions: number,
+    hasExplicitPantryItems: boolean,
+): readonly PantrySuggestion[] {
+    if (totalCookingSessions <= 0 || hasExplicitPantryItems) {
+        return [];
+    }
+
+    const suggestions: PantrySuggestion[] = [];
+
+    // Estimasi rata-rata 15-20ml minyak per sesi masak rumahan
+    if (totalCookingSessions >= 35) {
+        suggestions.push({
+            id: 'auto-minyak-2l',
+            name: 'Minyak Goreng',
+            recommendedPackLabel: '1 Pouch (2 Liter)',
+            estimatedCost: 36000,
+            reason: `Estimasi untuk ±${totalCookingSessions} sesi masak bahan segar`,
+        });
+    } else {
+        suggestions.push({
+            id: 'auto-minyak-1l',
+            name: 'Minyak Goreng',
+            recommendedPackLabel: '1 Pouch (1 Liter)',
+            estimatedCost: 18500,
+            reason: `Estimasi untuk ±${totalCookingSessions} sesi masak bahan segar`,
+        });
+    }
+
+    suggestions.push({
+        id: 'auto-bumbu-dasar',
+        name: 'Bumbu Dasar (Garam, Gula, Bawang, Kecap)',
+        recommendedPackLabel:
+            totalCookingSessions >= 30 ? '1 Paket Lengkap Bulanan' : '1 Paket Hemat Kos',
+        estimatedCost: totalCookingSessions >= 30 ? 35000 : 20000,
+        reason: 'Kebutuhan penyedap & tumis proporsional intensitas masak',
+    });
+
+    return suggestions;
+}
+
 export function calculateBudgetSummary(
     schedule: MonthlySchedule,
+    unscheduledMap: UnscheduledPortionMap,
     catalogMap: ReadonlyMap<string, CatalogItem>,
+    bundleMap: ReadonlyMap<string, MealBundle>,
     targetBudget: number,
 ): BudgetSummary {
-    const portionTotals = new Map<string, number>();
+    const scheduledTotals = new Map<string, number>();
+    const unscheduledTotals = new Map<string, number>();
+
     const periodConsumedCost: Record<MealPeriod, number> = {
         breakfast: 0,
         lunch: 0,
@@ -70,8 +119,34 @@ export function calculateBudgetSummary(
         consumedCost: 0,
     }));
 
+    const expandEntryToItems = (
+        entryId: string,
+        multiplier: number,
+    ): readonly { item: CatalogItem; portions: number }[] => {
+        const directItem = catalogMap.get(entryId);
+        if (directItem) {
+            return [{ item: directItem, portions: multiplier }];
+        }
+        const bundle = bundleMap.get(entryId);
+        if (bundle) {
+            const expanded: { item: CatalogItem; portions: number }[] = [];
+            for (const comp of bundle.components) {
+                const compItem = catalogMap.get(comp.itemId);
+                if (compItem && comp.portions > 0) {
+                    expanded.push({
+                        item: compItem,
+                        portions: comp.portions * multiplier,
+                    });
+                }
+            }
+            return expanded;
+        }
+        return [];
+    };
+
     let activeDaysCount = 0;
 
+    // 1. Agregasi dari Kalender 31 Hari
     for (let day = 1; day <= 31; day += 1) {
         const dayPlan = schedule[day];
         if (!dayPlan) continue;
@@ -80,24 +155,25 @@ export function calculateBudgetSummary(
         let dayHasMenu = false;
 
         for (const period of MEAL_PERIODS) {
-            const entries = dayPlan[period];
-            for (const entry of entries) {
+            for (const entry of dayPlan[period]) {
                 if (entry.portions <= 0) continue;
-                const item = catalogMap.get(entry.itemId);
-                if (!item) continue;
+                const resolvedList = expandEntryToItems(entry.itemId, entry.portions);
+                if (resolvedList.length === 0) continue;
 
                 dayHasMenu = true;
-                portionTotals.set(
-                    entry.itemId,
-                    (portionTotals.get(entry.itemId) ?? 0) + entry.portions,
-                );
+                for (const { item, portions } of resolvedList) {
+                    scheduledTotals.set(
+                        item.id,
+                        (scheduledTotals.get(item.id) ?? 0) + portions,
+                    );
 
-                const unitCost = item.packPrice / Math.max(1, item.portionsPerPack);
-                const slotCost = unitCost * entry.portions;
+                    const unitCost = item.packPrice / Math.max(1, item.portionsPerPack);
+                    const slotCost = unitCost * portions;
 
-                periodConsumedCost[period] += slotCost;
-                weeklyAcc[weekIdx].totalPortions += entry.portions;
-                weeklyAcc[weekIdx].consumedCost += slotCost;
+                    periodConsumedCost[period] += slotCost;
+                    weeklyAcc[weekIdx].totalPortions += portions;
+                    weeklyAcc[weekIdx].consumedCost += slotCost;
+                }
             }
         }
 
@@ -107,23 +183,50 @@ export function calculateBudgetSummary(
         }
     }
 
+    // 2. Agregasi dari Frekuensi Bulanan Langsung (Spreadsheet Mode)
+    for (const [entryId, count] of Object.entries(unscheduledMap)) {
+        if (!Number.isFinite(count) || count <= 0) continue;
+        const resolvedList = expandEntryToItems(entryId, count);
+        for (const { item, portions } of resolvedList) {
+            unscheduledTotals.set(
+                item.id,
+                (unscheduledTotals.get(item.id) ?? 0) + portions,
+            );
+        }
+    }
+
+    // 3. Gabungkan & Hitung Pembulatan Kemasan Ritel
+    const allItemIds = new Set<string>([
+        ...scheduledTotals.keys(),
+        ...unscheduledTotals.keys(),
+    ]);
+
     const lineItems: GroceryLineItem[] = [];
     const underutilizedItems: GroceryLineItem[] = [];
     const categoryCheckoutCost: Partial<Record<CatalogCategory, number>> = {};
 
     let totalUsedPortions = 0;
+    let totalScheduledPortions = 0;
+    let totalUnscheduledPortions = 0;
     let totalConsumedCost = 0;
     let totalRetailCheckoutCost = 0;
     let foodCheckoutCost = 0;
     let drinkCheckoutCost = 0;
+    let totalCookingSessions = 0;
+    let hasExplicitPantryItems = false;
 
-    for (const [itemId, usedPortions] of portionTotals.entries()) {
+    for (const itemId of allItemIds) {
         const item = catalogMap.get(itemId);
-        if (!item || usedPortions <= 0) continue;
+        if (!item) continue;
+
+        const scheduledPortions = scheduledTotals.get(itemId) ?? 0;
+        const unscheduledPortions = unscheduledTotals.get(itemId) ?? 0;
+        const usedPortions = scheduledPortions + unscheduledPortions;
+        if (usedPortions <= 0) continue;
 
         const safeYield = Math.max(1, item.portionsPerPack);
-        const unitPortionCost = item.packPrice / safeYield;
-        const consumedCost = Math.round(unitPortionCost * usedPortions);
+        const unitConsumptionPrice = Math.round(item.packPrice / safeYield);
+        const consumedCost = Math.round((item.packPrice / safeYield) * usedPortions);
         const packsToBuy = Math.ceil(usedPortions / safeYield);
         const retailCheckoutCost = packsToBuy * item.packPrice;
         const totalPurchasedPortions = packsToBuy * safeYield;
@@ -135,8 +238,17 @@ export function calculateBudgetSummary(
         const isLowUtilization = safeYield > 1 && utilizationPercent < 50;
 
         totalUsedPortions += usedPortions;
+        totalScheduledPortions += scheduledPortions;
+        totalUnscheduledPortions += unscheduledPortions;
         totalConsumedCost += consumedCost;
         totalRetailCheckoutCost += retailCheckoutCost;
+
+        if (item.requiresCooking) {
+            totalCookingSessions += usedPortions;
+        }
+        if (item.category === 'pantry-seasoning') {
+            hasExplicitPantryItems = true;
+        }
 
         if (item.kind === 'food') {
             foodCheckoutCost += retailCheckoutCost;
@@ -150,6 +262,9 @@ export function calculateBudgetSummary(
         const line: GroceryLineItem = {
             item,
             usedPortions,
+            unscheduledPortions,
+            scheduledPortions,
+            unitConsumptionPrice,
             consumedCost,
             packsToBuy,
             retailCheckoutCost,
@@ -167,6 +282,15 @@ export function calculateBudgetSummary(
 
     lineItems.sort((a, b) => b.retailCheckoutCost - a.retailCheckoutCost);
     underutilizedItems.sort((a, b) => a.utilizationPercent - b.utilizationPercent);
+
+    const pantrySuggestions = buildSmartPantrySuggestions(
+        totalCookingSessions,
+        hasExplicitPantryItems,
+    );
+    const suggestedPantryTotalCost = pantrySuggestions.reduce(
+        (sum, s) => sum + s.estimatedCost,
+        0,
+    );
 
     const weeklyBreakdown: WeeklyCostSummary[] = weeklyAcc.map((w) => ({
         week: w.week,
@@ -186,7 +310,12 @@ export function calculateBudgetSummary(
 
     return {
         lineItems,
+        pantrySuggestions,
+        suggestedPantryTotalCost,
+        totalCookingSessions,
         totalUsedPortions,
+        totalUnscheduledPortions,
+        totalScheduledPortions,
         totalConsumedCost,
         totalRetailCheckoutCost,
         totalLeftoverValue,
@@ -207,4 +336,64 @@ export function calculateBudgetSummary(
         budgetUsagePercent,
         isOverBudget: safeTarget > 0 && totalRetailCheckoutCost > safeTarget,
     };
+}
+
+/**
+ * Menyebar porsi bulanan yang belum terjadwal secara merata ke kalender 31 hari.
+ */
+export function distributePortionsToSchedule(
+    currentSchedule: MonthlySchedule,
+    unscheduledMap: UnscheduledPortionMap,
+    catalogMap: ReadonlyMap<string, CatalogItem>,
+    bundleMap: ReadonlyMap<string, MealBundle>,
+): MonthlySchedule {
+    const next: Record<number, DaySchedule> = {};
+    for (let day = 1; day <= 31; day += 1) {
+        const existing = currentSchedule[day] ?? {
+            breakfast: [],
+            lunch: [],
+            dinner: [],
+        };
+        next[day] = {
+            breakfast: existing.breakfast.map((e) => ({ ...e })),
+            lunch: existing.lunch.map((e) => ({ ...e })),
+            dinner: existing.dinner.map((e) => ({ ...e })),
+        };
+    }
+
+    for (const [entryId, totalToPlace] of Object.entries(unscheduledMap)) {
+        if (!Number.isFinite(totalToPlace) || totalToPlace <= 0) continue;
+
+        const item = catalogMap.get(entryId);
+        const bundle = bundleMap.get(entryId);
+        if (!item && !bundle) continue;
+
+        const periods: readonly MealPeriod[] =
+            item?.preferredPeriods && item.preferredPeriods.length > 0
+                ? item.preferredPeriods
+                : bundle?.preferredPeriods && bundle.preferredPeriods.length > 0
+                    ? bundle.preferredPeriods
+                    : ['lunch', 'dinner'];
+
+        const count = Math.round(totalToPlace);
+        const step = 31 / count;
+
+        for (let i = 0; i < count; i += 1) {
+            const day = Math.min(31, Math.max(1, Math.floor(i * step) + 1));
+            const period = periods[i % periods.length];
+            const slot = next[day][period] as ScheduledEntry[];
+            const existingIdx = slot.findIndex((e) => e.itemId === entryId);
+
+            if (existingIdx >= 0) {
+                slot[existingIdx] = {
+                    ...slot[existingIdx],
+                    portions: slot[existingIdx].portions + 1,
+                };
+            } else {
+                slot.push({ itemId: entryId, portions: 1 });
+            }
+        }
+    }
+
+    return next;
 }
