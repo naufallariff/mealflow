@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ArrowRight, Home, User } from 'lucide-react';
+import type { ConfirmDialogConfig } from '../ui/ConfirmDialog';
 
 export interface QuickStartTemplate {
     readonly id: string;
@@ -50,12 +51,32 @@ const STARTER_TEMPLATES: readonly QuickStartTemplate[] = [
 interface InteractiveEmptyStateProps {
     readonly onApplyTemplate: (portions: Readonly<Record<string, number>>) => void;
     readonly onFocusPlanner: () => void;
+    readonly onRequestConfirm?: (config: ConfirmDialogConfig) => void;
 }
 
 export const InteractiveEmptyState: React.FC<InteractiveEmptyStateProps> = ({
     onApplyTemplate,
     onFocusPlanner,
+    onRequestConfirm,
 }) => {
+    const handleSelectTemplate = (tpl: QuickStartTemplate) => {
+        const applyNow = () => onApplyTemplate(tpl.portions);
+
+        if (!onRequestConfirm) {
+            applyNow();
+            return;
+        }
+
+        onRequestConfirm({
+            title: `Terapkan ${tpl.title}?`,
+            description:
+                'Porsi bulanan pada bahan pokok yang ada di pola ini akan diisi otomatis. Rencana yang sudah Anda susun bisa ikut berubah.',
+            confirmLabel: 'Ya, Gunakan Pola',
+            tone: 'primary',
+            onConfirm: applyNow,
+        });
+    };
+
     return (
         <section
             aria-label="Mulai perencanaan belanja bulanan"
@@ -82,7 +103,7 @@ export const InteractiveEmptyState: React.FC<InteractiveEmptyStateProps> = ({
                         <button
                             key={tpl.id}
                             type="button"
-                            onClick={() => onApplyTemplate(tpl.portions)}
+                            onClick={() => handleSelectTemplate(tpl)}
                             className="group flex flex-col justify-between rounded-2xl border border-(--border-subtle) bg-(--glass-card) p-4 text-left transition-transform duration-150 cursor-pointer hover:border-brand focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 active:scale-99"
                         >
                             <div>

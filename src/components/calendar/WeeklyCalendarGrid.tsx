@@ -21,6 +21,7 @@ interface WeeklyCalendarGridProps {
     readonly onRequestConfirm: (config: ConfirmDialogConfig) => void;
     readonly onCancelPendingItem?: () => void;
     readonly onChangeWeek: (week: number) => void;
+    readonly onOpenSlotPicker?: (day: number, period: MealPeriod) => void;
     readonly onDropItem: (day: number, period: MealPeriod, itemId: string) => void;
     readonly onUpdatePortion: (
         day: number,
@@ -87,6 +88,7 @@ export const WeeklyCalendarGrid: React.FC<WeeklyCalendarGridProps> = ({
     onRequestConfirm,
     onCancelPendingItem,
     onChangeWeek,
+    onOpenSlotPicker,
     onDropItem,
     onUpdatePortion,
     onClearDay,
@@ -122,7 +124,7 @@ export const WeeklyCalendarGrid: React.FC<WeeklyCalendarGridProps> = ({
 
     return (
         <div className="flex flex-col">
-            {/* Active Tap-to-Place Banner */}
+            {/* Banner Mode Pasang Cepat */}
             {pendingItem && (
                 <div className="mf-banner-enter mb-4 flex items-center justify-between gap-3 rounded-2xl border border-brand bg-brand-glass p-3">
                     <div className="flex min-w-0 items-center gap-2.5">
@@ -153,7 +155,7 @@ export const WeeklyCalendarGrid: React.FC<WeeklyCalendarGridProps> = ({
                 </div>
             )}
 
-            {/* Header Bento */}
+            {/* Header Kalender */}
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <span className="mf-eyebrow">Jadwal Makan 31 Hari (Opsional)</span>
@@ -167,7 +169,7 @@ export const WeeklyCalendarGrid: React.FC<WeeklyCalendarGridProps> = ({
                     </div>
                 </div>
 
-                {/* Desktop Column Density Toggle */}
+                {/* Pengaturan Kepadatan Kolom Desktop */}
                 <div className="hidden items-center gap-1 rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) p-1 xl:flex">
                     <button
                         type="button"
@@ -192,7 +194,7 @@ export const WeeklyCalendarGrid: React.FC<WeeklyCalendarGridProps> = ({
                 </div>
             </div>
 
-            {/* Symmetrical 5-Column Segmented Control (M1–M5) */}
+            {/* Pilihan Minggu M1 sampai M5 */}
             <div
                 role="tablist"
                 aria-label="Pilih minggu"
@@ -218,7 +220,7 @@ export const WeeklyCalendarGrid: React.FC<WeeklyCalendarGridProps> = ({
                 })}
             </div>
 
-            {/* Action Toolbar */}
+            {/* Toolbar Aksi Mingguan */}
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-b border-(--border-subtle) pb-3.5">
                 <div className="flex flex-wrap items-center gap-1.5">
                     {activeWeek < 5 && (
@@ -255,15 +257,18 @@ export const WeeklyCalendarGrid: React.FC<WeeklyCalendarGridProps> = ({
                 )}
             </div>
 
-            {/* Days Bento Grid */}
+            {/* Grid Kartu Hari */}
             <div data-cols={desktopCols} className="mf-days-grid mt-4">
                 {currentRange.days.map((day) => (
                     <MealSlotCard
                         key={day}
                         day={day}
-                        dayPlan={schedule[day] ?? { breakfast: [], lunch: [], dinner: [] }}
+                        dayPlan={
+                            schedule[day] ?? { breakfast: [], lunch: [], dinner: [] }
+                        }
                         catalogMap={catalogMap}
                         pendingItem={pendingItem}
+                        onOpenSlotPicker={onOpenSlotPicker}
                         onDropItem={onDropItem}
                         onUpdatePortion={onUpdatePortion}
                         onClearDay={handleConfirmClearDay}

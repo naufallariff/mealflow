@@ -32,7 +32,7 @@ export function useMealflowStore() {
     const [hydrated] = useState(() => loadWorkspaceState());
 
     const [activeTab, setActiveTab] = useState<ActiveWorkspaceTab>(
-        () => hydrated?.activeTab ?? 'planner',
+        () => loadWorkspaceState()?.activeTab ?? 'grocery',
     );
     const [targetBudget, setTargetBudget] = useState<number>(
         () => hydrated?.targetBudget ?? DEFAULT_BUDGET,
@@ -508,7 +508,7 @@ export function useMealflowStore() {
 
     const resetAllWorkspace = useCallback(() => {
         clearWorkspaceStorage();
-        setActiveTab('planner');
+        setActiveTab('grocery');
         setTargetBudget(DEFAULT_BUDGET);
         setActiveWeek(1);
         setUnscheduledPortions({});

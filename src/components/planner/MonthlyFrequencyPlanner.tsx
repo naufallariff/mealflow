@@ -21,6 +21,7 @@ import type {
 import { formatRupiah } from '../../utils/format';
 import { InteractiveEmptyState } from './InteractiveEmptyState';
 import { MealBundleModal } from './MealBundleModal';
+import type { ConfirmDialogConfig } from '../ui/ConfirmDialog';
 
 interface MonthlyFrequencyPlannerProps {
     readonly catalog: readonly CatalogItem[];
@@ -35,6 +36,7 @@ interface MonthlyFrequencyPlannerProps {
         components: readonly BundleComponent[],
     ) => void;
     readonly onDistributeToCalendar: () => void;
+    readonly onRequestConfirm?: (config: ConfirmDialogConfig) => void;
 }
 
 export const MonthlyFrequencyPlanner: React.FC<
@@ -48,6 +50,7 @@ export const MonthlyFrequencyPlanner: React.FC<
     onAdjustPortions,
     onSaveBundle,
     onDistributeToCalendar,
+    onRequestConfirm,
 }) => {
         const [selectedCategory, setSelectedCategory] = useState<
             'all' | CatalogCategory
@@ -127,6 +130,7 @@ export const MonthlyFrequencyPlanner: React.FC<
                             const el = document.getElementById('mf-frequency-search');
                             el?.focus();
                         }}
+                        onRequestConfirm={onRequestConfirm}
                     />
                 )}
 

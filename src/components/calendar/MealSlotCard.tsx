@@ -11,6 +11,7 @@ interface MealSlotCardProps {
     readonly dayPlan: DaySchedule;
     readonly catalogMap: ReadonlyMap<string, CatalogItem>;
     readonly pendingItem?: CatalogItem | null;
+    readonly onOpenSlotPicker?: (day: number, period: MealPeriod) => void;
     readonly onDropItem: (day: number, period: MealPeriod, itemId: string) => void;
     readonly onUpdatePortion: (
         day: number,
@@ -37,6 +38,7 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
         dayPlan,
         catalogMap,
         pendingItem = null,
+        onOpenSlotPicker,
         onDropItem,
         onUpdatePortion,
         onClearDay,
@@ -67,13 +69,21 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
 
         const isSelectingSlot = Boolean(pendingItem);
 
+        const handleSlotClick = (period: MealPeriod) => {
+            if (pendingItem) {
+                onDropItem(day, period, pendingItem.id);
+                return;
+            }
+            onOpenSlotPicker?.(day, period);
+        };
+
         return (
             <article data-active={hasAnyEntry} className="mf-day-card">
-                {/* Day Header */}
+                {/* Header Hari */}
                 <header className="flex items-center justify-between border-b border-(--border-subtle) pb-2.5">
                     <div className="flex items-center gap-2">
                         <span
-                            className={`tabular-nums flex h-6.5 w-6.5 items-center justify-center rounded-lg text-xs font-extrabold transition-colors ${hasAnyEntry
+                            className={`flex size-6.5 items-center justify-center rounded-lg text-xs font-extrabold tabular-nums transition-colors ${hasAnyEntry
                                     ? 'bg-brand text-white'
                                     : 'border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary'
                                 }`}
@@ -86,7 +96,7 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                     </div>
 
                     <div className="flex items-center gap-1">
-                        <span className="tabular-nums text-xs font-bold text-ink-secondary">
+                        <span className="text-xs font-bold text-ink-secondary tabular-nums">
                             {formatIdr(dayEstimatedCost)}
                         </span>
                         {hasAnyEntry && (
@@ -95,15 +105,15 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                 onClick={() => onClearDay(day)}
                                 title={`Kosongkan jadwal hari ke-${day}`}
                                 aria-label={`Kosongkan jadwal hari ke-${day}`}
-                                className="flex h-7 w-7 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400"
+                                className="flex size-7 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-red-500/10 hover:text-red-600 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 dark:hover:text-red-400"
                             >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="size-3.5" aria-hidden="true" />
                             </button>
                         )}
                     </div>
                 </header>
 
-                {/* Meal Slots (Pagi, Siang, Malam) */}
+                {/* Slot Waktu Makan (Pagi, Siang, Malam) */}
                 <div className="mt-3 space-y-2.5">
                     {PERIOD_CONFIG.map(({ key, label, slotTheme }) => {
                         const entries = dayPlan[key];
@@ -115,20 +125,18 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                 key={key}
                                 data-slot={slotTheme}
                                 data-selectable={isSelectingSlot}
-                                role={isSelectingSlot ? 'button' : undefined}
-                                tabIndex={isSelectingSlot ? 0 : undefined}
-                                onClick={() => {
-                                    if (pendingItem) {
-                                        onDropItem(day, key, pendingItem.id);
-                                    }
-                                }}
+                                role="button"
+                                tabIndex={0}
+                                aria-label={
+                                    isSelectingSlot
+                                        ? `Pasang ${pendingItem?.name ?? 'menu'} ke slot ${label} Hari ke-${day}`
+                                        : `Pilih menu untuk slot ${label} Hari ke-${day}`
+                                }
+                                onClick={() => handleSlotClick(key)}
                                 onKeyDown={(e) => {
-                                    if (
-                                        pendingItem &&
-                                        (e.key === 'Enter' || e.key === ' ')
-                                    ) {
+                                    if (e.key === 'Enter' || e.key === ' ') {
                                         e.preventDefault();
-                                        onDropItem(day, key, pendingItem.id);
+                                        handleSlotClick(key);
                                     }
                                 }}
                                 onDragOver={(e) => {
@@ -142,7 +150,8 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                     const itemId = e.dataTransfer.getData('text/plain');
                                     if (itemId) onDropItem(day, key, itemId);
                                 }}
-                                className={`mf-meal-slot ${isOver ? 'ring-2 ring-brand' : ''}`}
+                                className={`mf-meal-slot cursor-pointer transition-colors focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 ${isOver ? 'ring-3 ring-brand' : ''
+                                    }`}
                             >
                                 <div className="flex items-center justify-between gap-2">
                                     <span data-slot={slotTheme} className="mf-slot-pill">
@@ -152,25 +161,27 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                         <span className="text-[10px] font-extrabold text-brand">
                                             + Klik untuk pasang
                                         </span>
+                                    ) : entries.length > 0 ? (
+                                        <span className="text-[10px] font-bold text-ink-secondary tabular-nums">
+                                            {formatIdr(slotCost)}
+                                        </span>
                                     ) : (
-                                        entries.length > 0 && (
-                                            <span className="tabular-nums text-[10px] font-bold text-ink-secondary">
-                                                {formatIdr(slotCost)}
-                                            </span>
-                                        )
+                                        <span className="text-[10px] font-semibold text-ink-muted">
+                                            + Pilih menu
+                                        </span>
                                     )}
                                 </div>
 
                                 {entries.length === 0 ? (
-                                    <p className="py-2 text-center text-[11px] font-medium text-ink-muted/75">
+                                    <p className="py-2 text-center text-[11px] font-medium text-ink-muted/80">
                                         {isSelectingSlot
                                             ? `Pasang ke ${label}`
-                                            : 'Kosong'}
+                                            : `Kosong — klik untuk tambah ${label.toLowerCase()}`}
                                     </p>
                                 ) : (
                                     <ul
                                         onClick={(e) => {
-                                            if (!isSelectingSlot) e.stopPropagation();
+                                            e.stopPropagation();
                                         }}
                                         className="mt-2 space-y-1.5"
                                     >
@@ -183,7 +194,7 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                                 <li key={entry.itemId} className="mf-meal-chip">
                                                     <div className="flex min-w-0 items-center gap-1.5">
                                                         <span
-                                                            className={`h-2 w-2 shrink-0 rounded-full ${dot}`}
+                                                            className={`size-2 shrink-0 rounded-full ${dot}`}
                                                         />
                                                         <span
                                                             title={item.name}
@@ -203,11 +214,11 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                                                 onUpdatePortion(day, key, entry.itemId, -1)
                                                             }
                                                             aria-label={`Kurangi porsi ${item.name}`}
-                                                            className="mf-stepper-btn"
+                                                            className="mf-stepper-btn focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40"
                                                         >
-                                                            <Minus className="h-3 w-3" />
+                                                            <Minus className="size-3" aria-hidden="true" />
                                                         </button>
-                                                        <span className="tabular-nums min-w-5 text-center text-[11px] font-bold text-ink-primary">
+                                                        <span className="min-w-5 text-center text-[11px] font-bold text-ink-primary tabular-nums">
                                                             {entry.portions}x
                                                         </span>
                                                         <button
@@ -216,9 +227,9 @@ export const MealSlotCard: React.FC<MealSlotCardProps> = React.memo(
                                                                 onUpdatePortion(day, key, entry.itemId, 1)
                                                             }
                                                             aria-label={`Tambah porsi ${item.name}`}
-                                                            className="mf-stepper-btn"
+                                                            className="mf-stepper-btn focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40"
                                                         >
-                                                            <Plus className="h-3 w-3" />
+                                                            <Plus className="size-3" aria-hidden="true" />
                                                         </button>
                                                     </div>
                                                 </li>
