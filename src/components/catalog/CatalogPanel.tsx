@@ -1,7 +1,7 @@
 // src/components/catalog/CatalogPanel.tsx
 
 import React, { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Layers, Plus, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Layers, Plus, Search, X } from 'lucide-react';
 import type { CatalogCategory, CatalogItem, ItemKind } from '../../types/meal';
 import { CATEGORY_META } from '../../data/default-catalog';
 import { useDebouncedValue } from '../../hooks/use-debounced-value';
@@ -25,6 +25,15 @@ interface CatalogPanelProps {
 }
 
 const ITEMS_PER_PAGE = 9;
+
+const STAPLE_FOOD_CATEGORIES: readonly CatalogCategory[] = [
+    'staple-carb',
+    'animal-protein',
+    'plant-protein-veg',
+    'pantry-seasoning',
+];
+
+const STAPLE_DRINK_CATEGORIES: readonly CatalogCategory[] = ['home-brew'];
 
 export const CatalogPanel: React.FC<CatalogPanelProps> = ({
     items,
@@ -57,9 +66,7 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
     }, [items]);
 
     const categoryOptions: readonly CatalogCategory[] =
-        activeKind === 'food'
-            ? ['raw-ingredient', 'seasoning-pantry', 'street-food', 'fancy-mall']
-            : ['home-brew', 'street-drink', 'cafe-mall'];
+        activeKind === 'food' ? STAPLE_FOOD_CATEGORIES : STAPLE_DRINK_CATEGORIES;
 
     const filteredItems = useMemo(() => {
         return items.filter((item) => {
@@ -112,14 +119,14 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
             <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5">
                     <div className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-xl bg-brand-glass text-brand">
-                        <Layers className="h-4 w-4" />
+                        <Layers className="h-4 w-4" aria-hidden="true" />
                     </div>
                     <div>
                         <h2 className="text-sm font-extrabold tracking-tight text-ink-primary">
-                            Katalog Bahan & Menu
+                            Katalog Bahan Pokok
                         </h2>
                         <p className="tabular-nums text-[11px] font-medium text-ink-muted">
-                            {filteredItems.length} item tersedia
+                            {filteredItems.length} bahan tersedia
                         </p>
                     </div>
                 </div>
@@ -128,29 +135,37 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                     type="button"
                     onClick={handleOpenCreate}
                     data-variant="primary"
-                    className="mf-liquid-pill h-8.5 px-3 text-xs"
+                    className="mf-liquid-pill h-9 px-3 text-xs"
                 >
-                    <Plus className="h-3.5 w-3.5" />
+                    <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Tambah</span>
                 </button>
             </div>
 
             {/* Food vs Drink Segmented Control */}
-            <div className="mt-4 grid grid-cols-2 gap-1 rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) p-1">
+            <div
+                role="tablist"
+                aria-label="Jenis katalog"
+                className="mt-4 grid grid-cols-2 gap-1 rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) p-1"
+            >
                 <button
                     type="button"
+                    role="tab"
+                    aria-selected={activeKind === 'food'}
                     onClick={() => handleSwitchKind('food')}
-                    className={`rounded-full py-1.5 text-xs font-bold transition-colors duration-150 ${activeKind === 'food'
+                    className={`rounded-full py-1.5 text-xs font-bold transition-transform duration-150 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 active:scale-97 ${activeKind === 'food'
                             ? 'bg-(--glass-card) text-ink-primary shadow-2xs'
                             : 'text-ink-secondary hover:text-ink-primary'
                         }`}
                 >
-                    Makanan ({foodCount})
+                    Bahan Makan ({foodCount})
                 </button>
                 <button
                     type="button"
+                    role="tab"
+                    aria-selected={activeKind === 'drink'}
                     onClick={() => handleSwitchKind('drink')}
-                    className={`rounded-full py-1.5 text-xs font-bold transition-colors duration-150 ${activeKind === 'drink'
+                    className={`rounded-full py-1.5 text-xs font-bold transition-transform duration-150 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 active:scale-97 ${activeKind === 'drink'
                             ? 'bg-(--glass-card) text-ink-primary shadow-2xs'
                             : 'text-ink-secondary hover:text-ink-primary'
                         }`}
@@ -161,7 +176,10 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
 
             {/* Search Input */}
             <div className="relative mt-3.5">
-                <Search className="pointer-events-none absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted" />
+                <Search
+                    className="pointer-events-none absolute top-1/2 left-3.5 h-3.5 w-3.5 -translate-y-1/2 text-ink-muted"
+                    aria-hidden="true"
+                />
                 <input
                     type="search"
                     value={searchText}
@@ -169,59 +187,79 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                         setSearchText(e.target.value);
                         setPage(1);
                     }}
+                    aria-label={
+                        activeKind === 'food'
+                            ? 'Cari bahan makanan pokok'
+                            : 'Cari minuman pokok harian'
+                    }
                     placeholder={
                         activeKind === 'food'
-                            ? 'Cari bahan atau menu makanan...'
-                            : 'Cari bahan atau menu minuman...'
+                            ? 'Cari beras, telur, ayam, sayur...'
+                            : 'Cari susu, teh, kopi, galon...'
                     }
-                    className="h-9.5 w-full rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) pr-3.5 pl-9 text-xs font-medium text-ink-primary placeholder:text-ink-muted outline-none transition-colors focus:border-brand focus:bg-(--glass-card) focus:ring-2 focus:ring-brand/20"
+                    className="h-9.5 w-full rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) pr-8.5 pl-9 text-xs font-medium text-ink-primary placeholder:text-ink-muted outline-hidden transition-colors focus:border-brand focus:bg-(--glass-card) focus:ring-3 focus:ring-brand/20"
                 />
+                {searchText.length > 0 && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSearchText('');
+                            setPage(1);
+                        }}
+                        aria-label="Hapus kata kunci pencarian"
+                        className="absolute top-1/2 right-2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full text-ink-muted transition-colors hover:bg-(--border-subtle) hover:text-ink-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand"
+                    >
+                        <X className="h-3.5 w-3.5" aria-hidden="true" />
+                    </button>
+                )}
             </div>
 
-            {/* Symmetrical 2-Column Category Grid with Generous Breathing Room */}
-            <div className="mt-3.5 grid grid-cols-2 gap-2">
-                <button
-                    type="button"
-                    onClick={() => {
-                        setSelectedCategory('all');
-                        setPage(1);
-                    }}
-                    className={`${activeKind === 'food' ? 'col-span-2' : ''
-                        } flex h-9 items-center justify-center rounded-xl px-3 text-[11px] font-bold transition-colors duration-150 active:scale-97 ${selectedCategory === 'all'
-                            ? 'bg-slate-900 text-white shadow-2xs dark:bg-white dark:text-slate-900'
-                            : 'border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary hover:text-ink-primary'
-                        }`}
-                >
-                    Semua Kategori
-                </button>
-                {categoryOptions.map((cat) => {
-                    const meta = CATEGORY_META[cat];
-                    const isSelected = selectedCategory === cat;
-                    return (
-                        <button
-                            key={cat}
-                            type="button"
-                            onClick={() => {
-                                setSelectedCategory(cat);
-                                setPage(1);
-                            }}
-                            className={`flex h-9 items-center justify-center gap-1.5 rounded-xl px-2.5 text-[11px] font-bold transition-colors duration-150 active:scale-97 ${isSelected
-                                    ? 'bg-slate-900 text-white shadow-2xs dark:bg-white dark:text-slate-900'
-                                    : 'border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary hover:text-ink-primary'
-                                }`}
-                        >
-                            <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${meta.dotColor}`} />
-                            <span className="truncate">{meta.label}</span>
-                        </button>
-                    );
-                })}
-            </div>
+            {/* Category Filter Grid */}
+            {categoryOptions.length > 1 && (
+                <div className="mt-3.5 grid grid-cols-2 gap-2">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setSelectedCategory('all');
+                            setPage(1);
+                        }}
+                        className="col-span-2 flex h-9 items-center justify-center rounded-xl px-3 text-[11px] font-bold transition-transform duration-150 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 active:scale-97 data-[selected=true]:bg-slate-900 data-[selected=true]:text-white data-[selected=true]:shadow-2xs dark:data-[selected=true]:bg-white dark:data-[selected=true]:text-slate-900 data-[selected=false]:border data-[selected=false]:border-(--border-subtle) data-[selected=false]:bg-(--glass-card-subtle) data-[selected=false]:text-ink-secondary data-[selected=false]:hover:text-ink-primary"
+                        data-selected={selectedCategory === 'all'}
+                    >
+                        Semua Kategori
+                    </button>
+                    {categoryOptions.map((cat) => {
+                        const meta = CATEGORY_META[cat];
+                        const isSelected = selectedCategory === cat;
+                        return (
+                            <button
+                                key={cat}
+                                type="button"
+                                onClick={() => {
+                                    setSelectedCategory(cat);
+                                    setPage(1);
+                                }}
+                                className={`flex h-9 items-center justify-center gap-1.5 rounded-xl px-2.5 text-[11px] font-bold transition-transform duration-150 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40 active:scale-97 ${isSelected
+                                        ? 'bg-slate-900 text-white shadow-2xs dark:bg-white dark:text-slate-900'
+                                        : 'border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary hover:text-ink-primary'
+                                    }`}
+                            >
+                                <span
+                                    className={`h-1.5 w-1.5 shrink-0 rounded-full ${meta.dotColor}`}
+                                    aria-hidden="true"
+                                />
+                                <span className="truncate">{meta.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
 
             {/* Paginated Item Cards */}
             <div className="mt-4 space-y-2.5 border-t border-(--border-subtle) pt-3.5">
                 {paginatedItems.length === 0 ? (
                     <p className="rounded-2xl border border-dashed border-(--border-subtle) bg-(--glass-card-subtle) py-8 text-center text-xs font-medium text-ink-muted">
-                        Tidak ada item yang sesuai dengan pencarian.
+                        Tidak ada bahan yang sesuai dengan pencarian.
                     </p>
                 ) : (
                     paginatedItems.map((item) => (
@@ -245,9 +283,9 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                         type="button"
                         disabled={safePage <= 1}
                         onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        className="mf-liquid-pill h-8 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
+                        className="mf-liquid-pill h-9 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
                     >
-                        <ChevronLeft className="h-3.5 w-3.5" />
+                        <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
                         <span>Sebelumnya</span>
                     </button>
                     <span className="tabular-nums text-xs font-bold text-ink-secondary">
@@ -257,10 +295,10 @@ export const CatalogPanel: React.FC<CatalogPanelProps> = ({
                         type="button"
                         disabled={safePage >= totalPages}
                         onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        className="mf-liquid-pill h-8 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
+                        className="mf-liquid-pill h-9 px-3 text-xs disabled:pointer-events-none disabled:opacity-40"
                     >
                         <span>Berikutnya</span>
-                        <ChevronRight className="h-3.5 w-3.5" />
+                        <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
                     </button>
                 </div>
             )}

@@ -8,49 +8,90 @@ export const FloatingGuideWidget: React.FC = () => {
 
     useEffect(() => {
         if (!isOpen) return;
-        const onKeyDown = (e: KeyboardEvent) => {
+        const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') setIsOpen(false);
         };
-        window.addEventListener('keydown', onKeyDown);
-        return () => window.removeEventListener('keydown', onKeyDown);
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen]);
 
     return (
         <>
-            {/* Peek Edge Tab at Bottom-Right */}
             <button
                 type="button"
-                onClick={() => setIsOpen((prev) => !prev)}
-                aria-expanded={isOpen}
-                aria-label="Buka panduan penggunaan"
-                title="Panduan Penggunaan"
-                className="mf-guide-peek"
+                onClick={() => setIsOpen(true)}
+                aria-label="Buka panduan singkat Mealflow"
+                className="mf-guide-peek focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40"
             >
-                <HelpCircle className="h-4 w-4 text-brand" />
+                <HelpCircle className="h-4 w-4 text-brand" aria-hidden="true" />
+                <span className="text-xs font-bold">Panduan</span>
             </button>
 
-            {/* Compact Narrative Card */}
             {isOpen && (
-                <aside
-                    aria-label="Panduan penggunaan Mealflow"
-                    className="fixed right-3 bottom-24 z-50 w-[min(20rem,calc(100vw-1.5rem))] rounded-2xl border border-(--border-strong) bg-(--glass-card) p-4 shadow-xl xl:right-6 xl:bottom-16"
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="mf-guide-title"
+                    className="mf-modal-scrim"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget) setIsOpen(false);
+                    }}
                 >
-                    <div className="flex items-center justify-between gap-2">
-                        <span className="mf-eyebrow">Panduan Singkat</span>
+                    <div className="mf-modal-glass space-y-4">
+                        <div className="flex items-center justify-between gap-2">
+                            <div>
+                                <span className="mf-eyebrow">Cara Kerja Mealflow</span>
+                                <h3
+                                    id="mf-guide-title"
+                                    className="mt-0.5 text-base font-extrabold text-ink-primary"
+                                >
+                                    Hitung Belanja Pokok Bulanan
+                                </h3>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsOpen(false)}
+                                aria-label="Tutup panduan"
+                                className="flex h-8 w-8 items-center justify-center rounded-full border border-(--border-subtle) text-ink-secondary hover:text-ink-primary focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand"
+                            >
+                                <X className="h-4 w-4" aria-hidden="true" />
+                            </button>
+                        </div>
+
+                        <ol className="space-y-2.5 text-xs leading-relaxed text-ink-secondary">
+                            <li className="rounded-xl border border-(--border-subtle) bg-(--glass-card-subtle) p-3">
+                                <strong className="block font-bold text-ink-primary">
+                                    1. Hitung dari Takaran Makan
+                                </strong>
+                                Pilih bahan pokok di katalog sesuai takaran konsumsi harian (butir, potong,
+                                porsi). Harga satuan dihitung otomatis dari kemasan pasar.
+                            </li>
+                            <li className="rounded-xl border border-(--border-subtle) bg-(--glass-card-subtle) p-3">
+                                <strong className="block font-bold text-ink-primary">
+                                    2. Pembulatan Kemasan Utuh & Sisa Stok
+                                </strong>
+                                Daftar Belanja membulatkan kebutuhan porsi menjadi kemasan ritel utuh dan
+                                menampilkan sisa porsi agar tidak mubazir.
+                            </li>
+                            <li className="rounded-xl border border-(--border-subtle) bg-(--glass-card-subtle) p-3">
+                                <strong className="block font-bold text-ink-primary">
+                                    3. Kalender 31 Hari (Opsional)
+                                </strong>
+                                Gunakan jadwal M1–M5 jika ingin membagi porsi ke waktu makan Pagi, Siang, dan
+                                Malam. Data tersimpan otomatis di perangkat Anda.
+                            </li>
+                        </ol>
+
                         <button
                             type="button"
                             onClick={() => setIsOpen(false)}
-                            aria-label="Tutup panduan"
-                            className="flex h-7 w-7 items-center justify-center rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary hover:text-ink-primary"
+                            data-variant="primary"
+                            className="mf-liquid-pill h-9.5 w-full text-xs"
                         >
-                            <X className="h-3.5 w-3.5" />
+                            Mengerti
                         </button>
                     </div>
-
-                    <p className="mt-2 text-xs leading-relaxed text-ink-secondary">
-                        Pilih bahan atau menu dari katalog lalu pasangkan ke slot makan harian sesuai kebutuhan. Sesuaikan jumlah porsi pada tiap jadwal dan sistem akan menghitung pembulatan kemasan belanja beserta sisa stok secara otomatis.
-                    </p>
-                </aside>
+                </div>
             )}
         </>
     );
