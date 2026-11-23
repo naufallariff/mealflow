@@ -12,7 +12,7 @@
     color: var(--ink-primary);
   }
 
-  /* 2. Floating Pill Navbar (Full-Width Aligned, Safe Mobile Fit) */
+  /* 2. Floating Pill Navbar */
   .mf-navbar {
     position: sticky;
     top: 0.75rem;
@@ -101,15 +101,31 @@
     cursor: pointer;
     user-select: none;
     touch-action: manipulation;
-    transition: transform 110ms var(--ease-fluid);
+    transition:
+      transform 140ms var(--ease-out),
+      border-color 150ms ease,
+      background-color 150ms ease;
   }
 
-  .mf-liquid-pill:hover {
-    border-color: var(--border-strong);
+  .mf-liquid-pill:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow:
+      var(--specular-edge),
+      0 0 0 3px color-mix(in srgb, var(--brand) 38%, transparent);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .mf-liquid-pill:hover {
+      border-color: var(--border-strong);
+    }
+
+    .mf-liquid-pill[data-variant="primary"]:hover {
+      background: var(--brand-hover);
+    }
   }
 
   .mf-liquid-pill:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
 
   .mf-liquid-pill[data-variant="primary"] {
@@ -119,10 +135,6 @@
     box-shadow:
       inset 0 1px 0 0 rgba(255, 255, 255, 0.25),
       0 4px 12px -2px rgba(37, 99, 235, 0.32);
-  }
-
-  .mf-liquid-pill[data-variant="primary"]:hover {
-    background: var(--brand-hover);
   }
 
   .mf-liquid-pill[data-variant="emerald"] {
@@ -218,19 +230,20 @@
     border-color: var(--evening-border);
   }
 
-  /* Tambahkan di bawah aturan .mf-meal-slot[data-slot="malam"] pada bagian 8 */
   .mf-meal-slot[data-selectable="true"] {
     cursor: pointer;
     border-style: dashed;
     border-width: 1.5px;
     border-color: var(--brand);
     transition:
-      transform 110ms var(--ease-fluid),
+      transform 140ms var(--ease-out),
       background-color 150ms ease;
   }
 
-  .mf-meal-slot[data-selectable="true"]:hover {
-    background: var(--brand-soft);
+  @media (hover: hover) and (pointer: fine) {
+    .mf-meal-slot[data-selectable="true"]:hover {
+      background: var(--brand-soft);
+    }
   }
 
   .mf-meal-slot[data-selectable="true"]:active {
@@ -287,24 +300,41 @@
 
   .mf-stepper-btn {
     display: flex;
-    height: 1.5rem;
-    width: 1.5rem;
+    height: 1.75rem;
+    width: 1.75rem;
     align-items: center;
     justify-content: center;
     border-radius: 9999px;
     color: var(--ink-secondary);
     cursor: pointer;
     touch-action: manipulation;
-    transition: transform 90ms ease;
+    transition:
+      transform 120ms var(--ease-out),
+      background-color 140ms ease,
+      color 140ms ease;
   }
 
-  .mf-stepper-btn:hover {
-    background: var(--brand-soft);
-    color: var(--brand);
+  @media (pointer: coarse) {
+    .mf-stepper-btn {
+      height: 2.25rem;
+      width: 2.25rem;
+    }
+  }
+
+  .mf-stepper-btn:focus-visible {
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 2px var(--brand);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .mf-stepper-btn:hover {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
   }
 
   .mf-stepper-btn:active {
-    transform: scale(0.9);
+    transform: scale(0.92);
   }
 
   /* 9. Catalog Item Card */
@@ -323,12 +353,16 @@
     padding: 0.625rem 0.75rem;
     content-visibility: auto;
     contain-intrinsic-size: 74px;
-    transition: transform 130ms var(--ease-fluid);
+    transition:
+      transform 150ms var(--ease-out),
+      border-color 150ms ease;
   }
 
-  .mf-catalog-card:hover {
-    border-color: var(--brand-border);
-    transform: translateY(-1px);
+  @media (hover: hover) and (pointer: fine) {
+    .mf-catalog-card:hover {
+      border-color: var(--brand-border);
+      transform: translateY(-1px);
+    }
   }
 
   /* 10. Budget Progress Bar */
@@ -344,7 +378,7 @@
     height: 100%;
     border-radius: 9999px;
     background: var(--brand);
-    transition: width 240ms var(--ease-fluid);
+    transition: width 240ms var(--ease-out);
   }
 
   .mf-budget-fill[data-state="warn"] {
@@ -366,7 +400,35 @@
     padding-right: 0.125rem;
   }
 
-  /* 12. Modal Frosted Backdrop & Sheet */
+  /* 12. Origin-Aware Popover & Enter Banner */
+  .mf-popover-menu {
+    transform-origin: top right;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    transition:
+      opacity 160ms var(--ease-out),
+      transform 160ms var(--ease-out);
+
+    @starting-style {
+      opacity: 0;
+      transform: scale(0.95) translateY(-4px);
+    }
+  }
+
+  .mf-banner-enter {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    transition:
+      opacity 180ms var(--ease-out),
+      transform 180ms var(--ease-out);
+
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-6px) scale(0.98);
+    }
+  }
+
+  /* 13. Modal Frosted Backdrop & Sheet */
   .mf-modal-scrim {
     position: fixed;
     inset: 0;
@@ -393,7 +455,7 @@
     padding: 1.25rem;
   }
 
-  /* 13. Floating Mobile Bottom Dock */
+  /* 14. Floating Mobile Bottom Dock */
   .mf-mobile-dock-wrap {
     position: fixed;
     inset-inline: 0;
@@ -440,11 +502,11 @@
     cursor: pointer;
     user-select: none;
     touch-action: manipulation;
-    transition: transform 110ms var(--ease-fluid);
+    transition: transform 140ms var(--ease-out);
   }
 
   .mf-dock-tab:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
 
   .mf-dock-tab[data-active="true"] {
@@ -475,7 +537,7 @@
     color: var(--brand);
   }
 
-  /* 14. Bottom-Right Peek Guide Tab */
+  /* 15. Bottom-Right Peek Guide Tab */
   .mf-guide-peek {
     position: fixed;
     right: 0;
@@ -495,13 +557,15 @@
     touch-action: manipulation;
     transform: translateX(0.35rem);
     transition:
-      transform 180ms var(--ease-fluid),
+      transform 180ms var(--ease-out),
       color 150ms ease;
   }
 
-  .mf-guide-peek:hover {
-    transform: translateX(0);
-    color: var(--brand);
+  @media (hover: hover) and (pointer: fine) {
+    .mf-guide-peek:hover {
+      transform: translateX(0);
+      color: var(--brand);
+    }
   }
 
   @media (min-width: 1280px) {
@@ -511,13 +575,16 @@
   }
 }
 
-/* 15. Accessibility: Reduced Motion & Reduced Transparency */
+/* 16. Accessibility: Reduced Motion & Reduced Transparency */
 @media (prefers-reduced-motion: reduce) {
   .mf-catalog-card,
   .mf-liquid-pill,
   .mf-stepper-btn,
   .mf-budget-fill,
-  .mf-guide-peek {
+  .mf-guide-peek,
+  .mf-popover-menu,
+  .mf-banner-enter,
+  .mf-meal-slot[data-selectable="true"] {
     transition: none !important;
     transform: none !important;
   }

@@ -9,7 +9,7 @@
   --bg-ambient-1: rgba(37, 99, 235, 0.06);
   --bg-ambient-2: rgba(14, 165, 233, 0.05);
 
-  /* Frosted Surfaces (Tegas, Milky, Zero GPU Bloat) */
+  /* Frosted Surfaces (Crisp, Milky, Zero GPU Bloat) */
   --glass-panel: rgba(255, 255, 255, 0.86);
   --glass-card: #ffffff;
   --glass-card-sheen: linear-gradient(
@@ -63,7 +63,10 @@
   --warning: #d97706;
   --danger: #dc2626;
 
-  /* Motion Timing */
+  /* Motion Timing (Emil Kowalski Strong Curves) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
