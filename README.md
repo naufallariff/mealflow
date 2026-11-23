@@ -1,168 +1,256 @@
-# 🍱 Mealflow
+<p align="center">
+  <img src="./public/favicon.svg" alt="Mealflow Logo" width="72" height="72" />
+</p>
 
-**Perencana Anggaran Belanja Pokok Bulanan, Pembulatan Kemasan Ritel & Jadwal Makan 31 Hari**
+<h1 align="center">Mealflow</h1>
 
-*Hitung kebutuhan bahan pokok dari takaran konsumsi harian, biarkan sistem membulatkannya ke kemasan pasar utuh, memantau risiko sisa stok, serta menyusun jadwal makan 31 hari secara presisi.*
+<p align="center">
+  <strong>Monthly Staple Grocery Budgeting, Retail-Pack Rounding & Optional 31-Day Meal Scheduling</strong>
+</p>
 
-## 💡 Latar Belakang & Tujuan
+<p align="center">
+  <a href="./LICENSE"><img src="[https://img.shields.io/badge/License-MIT-blue.svg](https://img.shields.io/badge/License-MIT-blue.svg)" alt="License: MIT" /></a>
+  <img src="[https://img.shields.io/badge/TypeScript-strict-3178C6.svg](https://img.shields.io/badge/TypeScript-strict-3178C6.svg)" alt="TypeScript strict" />
+  <img src="[https://img.shields.io/badge/React-19-149ECA.svg](https://img.shields.io/badge/React-19-149ECA.svg)" alt="React 19" />
+  <img src="[https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4.svg](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4.svg)" alt="Tailwind CSS v4" />
+  <img src="[https://img.shields.io/badge/Architecture-Local--First-10B981.svg](https://img.shields.io/badge/Architecture-Local--First-10B981.svg)" alt="Local-First" />
+</p>
 
-Merencanakan anggaran makan bulanan sering kali meleset karena perbedaan antara **takaran yang dikonsumsi** dan **satuan kemasan yang dijual di pasaran**. Kita tidak bisa membeli 2 butir telur, 1 potong ayam, atau 100 gram beras secara terpisah di kasir—pembelian selalu terikat pada satuan kemasan seperti 1 kg telur (±16 butir), 5 kg beras (50 porsi), atau 1 galon air minum.
+---
 
-**Mealflow** hadir sebagai aplikasi web terbuka (*open-source*) yang dirancang dengan pendekatan **Consumption-First Input, Retail-Pack Output** untuk membantu mahasiswa, anak kos, pekerja perantau, maupun pengelola rumah tangga menyusun anggaran belanja pokok bulanan secara realistis, menghindari pembelian kemasan berlebih yang berisiko mubazir, dan secara opsional menyebarkan porsi tersebut ke jadwal makan **31 hari penuh**.
+## App Preview
 
-## ✨ Fitur Utama
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" valign="top">
+        <a href="./docs/screenshots/mobile-dashboard.png">
+          <img src="./docs/screenshots/mobile-dashboard.png" alt="Mealflow Mobile Dashboard Preview" width="220" />
+        </a>
+        <br />
+        <sub><strong>Dashboard & Cashier</strong></sub>
+      </td>
+      <td align="center" valign="top">
+        <a href="./docs/screenshots/mobile-planner.png">
+          <img src="./docs/screenshots/mobile-planner.png" alt="Mealflow Mobile Planner Preview" width="220" />
+        </a>
+        <br />
+        <sub><strong>Monthly Planner (Rencana)</strong></sub>
+      </td>
+      <td align="center" valign="top">
+        <a href="./docs/screenshots/mobile-calendar.png">
+          <img src="./docs/screenshots/mobile-calendar.png" alt="Mealflow Mobile 31-Day Calendar Preview" width="220" />
+        </a>
+        <br />
+        <sub><strong>31-Day Calendar (Kalender)</strong></sub>
+      </td>
+      <td align="center" valign="top">
+        <a href="./docs/screenshots/mobile-catalog.png">
+          <img src="./docs/screenshots/mobile-catalog.png" alt="Mealflow Mobile Catalog Preview" width="220" />
+        </a>
+        <br />
+        <sub><strong>Staple Catalog (Katalog)</strong></sub>
+      </td>
+    </tr>
+  </table>
+</div>
 
-* 🧩 **Katalog Bahan Pokok & Taksonomi v2**
-  Terbagi dalam kategori pokok yang jelas untuk Makanan (*Karbohidrat Pokok*, *Protein Hewani*, *Protein Nabati & Sayur*, *Minyak & Bumbu Dapur*) dan Minuman (*Minuman Pokok Harian*). Setiap item mendefinisikan satuan konsumsi terkecil (`consumptionUnit`), kemasan pasar (`packUnit`), harga kemasan (`packPrice`), dan jumlah porsi per kemasan (`portionsPerPack`), serta mendukung penambahan bahan kustom maupun penyesuaian harga lokal.
+> **screenshots Assets (`./docs/screenshots/`):** Place your mobile viewport captures at `./docs/screenshots/mobile-dashboard.png`, `./docs/screenshots/mobile-planner.png`, `./docs/screenshots/mobile-calendar.png`, and `./docs/screenshots/mobile-catalog.png`.
 
-* 📊 **Perencana Frekuensi Bulanan & Paket Masakan Cepat**
-  Susun porsi bulanan secara langsung menggunakan kontrol langkah (`+/-`) atau input angka cepat, pilih templat awal (*Pola Hemat Anak Kos* atau *Pola Dapur Harian*), serta gunakan **Paket Masakan** (*Editable Meal Bundles*) yang otomatis memecah paket menu menjadi kebutuhan bahan mentah di daftar belanja.
+---
 
-* 🗓️ **Kalender 31 Hari Interaktif (M1–M5) & Distribusi Otomatis**
-  Tersedia sebagai lapisan penjadwalan opsional yang terhubung dua arah dengan frekuensi bulanan. Mendukung penyebaran porsi otomatis ke 31 hari (`Sebar Porsi ke Kalender`), *drag-and-drop* di desktop maupun **Tap-to-Place** di layar sentuh, salin antar-minggu, dan duplikasi pola ke 31 hari.
+## Table of Contents
 
-* 🛒 **Kalkulasi Pembulatan Kemasan, Sisa Stok & Saran Minyak/Bumbu**
-  Menghitung jumlah kemasan ritel yang wajib dibeli (`Math.ceil(usedPortions / portionsPerPack)`), biaya porsi terpakai vs total bayar kasir, nilai sisa stok akhir bulan, peringatan otomatis jika utilisasi kemasan `< 50%`, serta **Smart Pantry Auto-Suggest** untuk kebutuhan minyak goreng dan bumbu dasar berdasarkan jumlah sesi masak bahan mentah.
+- [Overview & Domain Model](#overview--domain-model)
+- [Core Features & UX Guardrails](#core-features--ux-guardrails)
+- [Tech Stack & Tooling](#tech-stack--tooling)
+- [System Architecture](#system-architecture)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Verification & Troubleshooting](#verification--troubleshooting)
+- [Contributing & License](#contributing--license)
 
-* ✅ **Dashboard Berjalan, Checklist Kasir, Ekspor Teks & Cadangan JSON**
-  Pantau persentase serapan anggaran, proporsi biaya per kategori, centang item belanja saat di pasar/minimarket, salin ringkasan belanja siap kirim ke WhatsApp atau catatan ponsel, buka lapisan estimasi gizi harian rata-rata 31 hari secara opsional, serta cadangkan atau pulihkan profil data dalam format JSON.
+---
 
-* 🌓 **Mode Terang & Gelap + Dukungan Offline (PWA)**
-  Transisi tema mulus berbasis *View Transitions API* dan penyimpanan lokal otomatis di peramban (`localStorage` + *Service Worker* & *Web App Manifest*) tanpa memerlukan akun atau koneksi server.
+## Overview & Domain Model
 
-## 🏗️ Arsitektur Sistem
+Monthly food budgets frequently drift because **consumption portions** differ from **retail market packaging**. Users consume portions such as 1 bowl of rice, 1 egg, 1 chicken cut, or 1 tbsp of cooking oil, whereas retail purchases are quantized into whole packs (such as 5 kg rice, 1 kg eggs, or 1 water gallon).
 
-Mealflow dirancang dengan pendekatan **Local-First & Zero-Backend**, sehingga seluruh komputasi berjalan instan di sisi klien (*client-side*) dengan latensi nol dan privasi penuh.
+Mealflow follows a **Consumption-First Input, Retail-Pack Output** model tailored for Indonesian households and boarding-house residents (*anak kos*):
 
+1. **Monthly Primary Budgeting**: Aggregate expected consumption portions per staple item across a 31-day cycle against a configurable monthly budget target (`targetBudget`).
+2. **Packaging & Inventory Control**: Round up consumed portions to whole retail packs (`Math.ceil(usedPortions / portionsPerPack)`), compute retail checkout cost vs. consumed value, surface remaining stock value, flag low-utilization packs (`< 50%`), and run **Smart Pantry Auto-Suggest** for cooking oil and basic seasonings proportional to raw cooking sessions.
+3. **Optional 31-Day Scheduling (`M1`–`M5`)**: Keep daily meal slot scheduling (`Pagi`, `Siang`, `Malam`) optional and bi-directionally synced with monthly frequency counts rather than forcing users to fill all 31 days just to estimate a grocery budget.
+
+---
+
+## Core Features & UX Guardrails
+
+- **Curated Staple Catalog & Custom Overrides**: Organized into core food and home-brew drink categories (`src/data/default-catalog.ts`, `src/data/catalog-items.json`). Supports custom items, local price/pack overrides, and reset to defaults without leaving the client.
+- **Monthly Frequency Planner & Editable Meal Bundles**: Adjust monthly portions via `+/-` steppers or numeric input, use starter templates (*Pola Hemat Anak Kos* and *Pola Dapur Harian*), and apply editable meal bundles that decompose into raw staple portions.
+- **Interactive 31-Day Calendar & Slot Picker**: Supports `Sebar Porsi ke Kalender`, desktop drag-and-drop, mobile tap-to-place (`pendingItem`), week copying (`Salin ke M{n+1}`), 31-day pattern duplication (`Terapkan 31 Hari`), and direct slot selection via `SlotMenuPickerModal` (`onOpenSlotPicker`).
+- **Destructive & Overwrite Confirmation Guardrails**: Actions that overwrite existing plans or clear state—such as applying starter templates (`InteractiveEmptyState`), duplicating a week across 31 days, clearing a day, or resetting the workspace—trigger `ConfirmDialog` (`role="alertdialog"`) to prevent accidental taps on mobile viewports.
+- **Dashboard-First Entry & Cashier Checklist**: Opens on the **Dashboard** view (`grocery` / `dashboard`) with budget absorption progress, category breakdown, cashier checklist (`checkedItemIds`), WhatsApp/plain-text grocery export, optional average daily nutrition estimates, and JSON backup/restore (`storage-engine.ts`).
+- **Theme Transitions & Offline PWA**: Light/dark mode with View Transitions API support (`use-theme.ts`), `localStorage` persistence (`mealflow.workspace.v3`), Web App Manifest (`public/manifest.webmanifest`), and Service Worker (`public/sw.js`).
+
+---
+
+## Tech Stack & Tooling
+
+| Layer | Technology | Role & Engineering Notes |
+| :--- | :--- | :--- |
+| **UI Framework** | React 19 + TypeScript | Declarative components with strict mode and `verbatimModuleSyntax` |
+| **Build & Dev Server** | Vite | Fast HMR, production bundling, and local preview server |
+| **Styling** | Tailwind CSS v4 | CSS-first styling, semantic design tokens (`tokens.css`), and bento layouts (`components.css`) |
+| **Icons** | Lucide React | Vector UI icons |
+| **Offline & PWA** | Web App Manifest + Service Worker | Static asset caching and offline support (`public/sw.js`, `public/manifest.webmanifest`) |
+| **Static Analysis** | TypeScript (`tsc --noEmit`) & Oxlint | Type safety and static lint checks |
+
+---
+
+## System Architecture
+
+Mealflow runs **100% client-side (Local-First, Zero-Backend)** with deterministic arithmetic in domain utilities and debounced persistence to `window.localStorage`:
+
+```text
++-----------------------------------------------------------------------+
+|                         PRESENTATION LAYER                            |
+|  FloatingNavbar       BudgetTargetCard       FloatingGuideWidget      |
+|  CatalogPanel         MonthlyFrequencyPlanner (Templates & Bundles)   |
+|  OngoingDashboardView WeeklyCalendarGrid (SlotMenuPickerModal)        |
+|  GrocerySummaryPanel  MobileBottomNav        ConfirmDialog            |
++-----------------------------------+-----------------------------------+
+                                    |
+                                    v
++-----------------------------------------------------------------------+
+|                      STATE & PERSISTENCE LAYER                        |
+|  useMealflowStore (Bi-Directional Sync, Memoized Budget & Catalog)    |
+|  storage-engine.ts (localStorage v3, 250ms Debounce, JSON Backup/IO)  |
++-----------------------------------+-----------------------------------+
+                                    |
+                                    v
++-----------------------------------------------------------------------+
+|                         CORE DOMAIN ENGINE                            |
+|  budget-engine.ts --------> Portion Aggregation, Retail Pack Rounding,|
+|                             Leftover Stock (<50% Flag), Smart Pantry  |
+|  export-and-nutrition.ts -> Plain-Text Grocery List & 31-Day Macros  |
+|  format.ts --------------> IDR (`Rp`) Formatting & Compact Labels      |
++-----------------------------------------------------------------------+
 ```
-+-------------------------------------------------------------------+
-|                        PRESENTATION LAYER                         |
-|  FloatingNavbar      |  BudgetTargetCard     |  FloatingGuideWidget|
-|  CatalogPanel        |  MonthlyFrequencyPlanner (Templates & Bundles)|
-|  OngoingDashboardView|  WeeklyCalendarGrid   |  GrocerySummaryPanel|
-+---------------------------------+---------------------------------+
-                                  |
-                                  v
-+-------------------------------------------------------------------+
-|                     STATE & PERSISTENCE LAYER                     |
-|     useMealflowStore (Bi-Directional Sync + Memoized Selectors)   |
-|     storage-engine.ts (LocalStorage v3 + JSON Backup/Restore)     |
-+---------------------------------+---------------------------------+
-                                  |
-                                  v
-+-------------------------------------------------------------------+
-|                        CORE DOMAIN ENGINE                         |
-|   budget-engine.ts  --->  Agregasi Frekuensi Bulanan & 31 Hari    |
-|                     --->  Unit Inversion & Pembulatan Kemasan     |
-|                     --->  Sisa Stok (<50% Alert) & Smart Pantry   |
-|   export-and-nutrition.ts ---> Ekspor Teks Belanja & Rata-Rata Gizi|
-+-------------------------------------------------------------------+
 
-```
+---
 
-### Struktur Direktori
+## Project Structure
 
-```
+```text
 mealflow/
+├── docs/
+│   └── screenshots/
+│       ├── mobile-calendar.png
+│       ├── mobile-catalog.png
+│       ├── mobile-dashboard.png
+│       └── mobile-planner.png
 ├── public/
-│   ├── favicon.svg                      # Ikon vektor aplikasi & PWA
-│   ├── manifest.webmanifest             # Web App Manifest untuk instalasi PWA
-│   └── sw.js                            # Service Worker offline aset & navigasi
+│   ├── favicon.svg
+│   ├── manifest.webmanifest
+│   └── sw.js
 ├── src/
 │   ├── components/
-│   │   ├── brand/                       # Identitas visual & monogram MealflowBrandMark
-│   │   ├── calendar/                    # Grid mingguan (M1–M5) & kartu slot Pagi/Siang/Malam
-│   │   ├── catalog/                     # Panel katalog, kartu item, & modal bahan kustom
-│   │   ├── dashboard/                   # Dashboard berjalan, checklist kasir, & backup JSON
-│   │   ├── layout/                      # Floating navbar, mobile dock, & panduan ringkas
-│   │   ├── planner/                     # Perencana frekuensi bulanan, empty state, & bundle modal
-│   │   ├── summary/                     # Kartu target anggaran & rincian daftar belanja
-│   │   └── ui/                          # Komponen reusable (ConfirmDialog)
+│   │   ├── brand/
+│   │   ├── calendar/
+│   │   │   ├── MealSlotCard.tsx
+│   │   │   ├── SlotMenuPickerModal.tsx
+│   │   │   └── WeeklyCalendarGrid.tsx
+│   │   ├── catalog/
+│   │   ├── dashboard/
+│   │   ├── layout/
+│   │   ├── planner/
+│   │   │   ├── InteractiveEmptyState.tsx
+│   │   │   ├── MealBundleModal.tsx
+│   │   │   └── MonthlyFrequencyPlanner.tsx
+│   │   ├── summary/
+│   │   └── ui/
+│   │       └── ConfirmDialog.tsx
 │   ├── data/
-│   │   ├── catalog-items.json           # Dataset bahan pokok & minuman bawaan
-│   │   └── default-catalog.ts           # Metadata kategori v2, pemetaan katalog, & bundle awal
+│   │   ├── catalog-items.json
+│   │   └── default-catalog.ts
 │   ├── hooks/
-│   │   ├── use-mealflow-store.ts        # Pusat manajemen state bulanan, kalender, & katalog
-│   │   ├── use-theme.ts                 # Pengelola tema terang/gelap dengan view transition
-│   │   └── use-debounced-value.ts       # Optimasi pencarian katalog
+│   │   ├── use-debounced-value.ts
+│   │   ├── use-mealflow-store.ts
+│   │   └── use-theme.ts
 │   ├── services/
-│   │   └── storage-engine.ts            # Persistensi localStorage v3 & parser impor/ekspor JSON
+│   │   └── storage-engine.ts
 │   ├── styles/
-│   │   ├── tokens.css                   # Design tokens warna, elevasi, & permukaan kaca
-│   │   ├── components.css               # Utilitas komponen bento, modal, & responsif
-│   │   └── index.css                    # Konfigurasi Tailwind CSS v4 & view transitions
+│   │   ├── components.css
+│   │   ├── index.css
+│   │   └── tokens.css
 │   ├── types/
-│   │   └── meal.ts                      # Definisi kontrak tipe TypeScript
-│   └── utils/
-│       ├── budget-engine.ts             # Mesin kalkulasi porsi, kemasan, sisa stok, & pantry
-│       ├── export-and-nutrition.ts      # Format teks daftar belanja & rata-rata gizi harian
-│       └── format.ts                    # Pemformatan mata uang Rupiah (format & ringkas)
+│   │   └── meal.ts
+│   ├── utils/
+│   │   ├── budget-engine.ts
+│   │   ├── export-and-nutrition.ts
+│   │   └── format.ts
+│   ├── App.tsx
+│   └── main.tsx
 ├── index.html
 ├── package.json
+├── tsconfig.json
 └── vite.config.ts
-
 ```
 
-## 🛠️ Tumpukan Teknologi
+---
 
-| Lapisan | Teknologi | Peran dalam Sistem | 
-| ----- | ----- | ----- | 
-| **Framework UI** | React 19 + TypeScript | Komponen deklaratif dengan keamanan tipe ketat (`verbatimModuleSyntax`) | 
-| **Build Tool** | Vite | Kompilasi cepat, bundling aset produksi, dan pratinjau lokal | 
-| **Styling** | Tailwind CSS v4 | Sistem desain responsif berbasis CSS variables, token kaca, & bento grid | 
-| **Ikonografi** | Lucide React | Ikon vektor ringan dan konsisten | 
-| **PWA & Offline** | Web Manifest + Service Worker | Penyimpanan aset statis & navigasi offline tanpa dependensi berat | 
-| **Linter / Cek** | TypeScript (`tsc`) & Oxlint | Pengecekan tipe ketat dan analisis statis kode | 
+## Getting Started
 
-## 🚀 Panduan Instalasi & Pengembangan Lokal
+### Prerequisites
 
-### Prasyarat
+- **Node.js**: Active/Maintenance LTS release (check `package.json` `engines` or install Node.js 20+/22+ LTS).
+- **Package Manager**: `npm` (or `pnpm` / `yarn` compatible with `package.json` scripts).
 
-* **Node.js** versi 18 atau lebih baru (disarankan LTS terbaru)
+### Installation & Local Development
 
-* **npm** (atau *package manager* yang kompatibel seperti `pnpm` / `yarn`)
+1. **Clone and enter the repository**
 
-### Langkah Menjalankan Proyek
-
-1. **Masuk ke direktori proyek**
-
-   ```
+   ```bash
+   git clone <repository-url>
    cd mealflow
-   
    ```
 
-2. **Instal dependensi**
+2. **Install dependencies**
 
-   ```
+   ```bash
    npm install
-   
    ```
 
-3. **Jalankan server pengembangan lokal**
+3. **Start the development server**
 
-   ```
+   ```bash
    npm run dev
-   
    ```
 
-4. **Periksa tipe TypeScript dan bangun berkas produksi**
+4. **Type-check and build for production**
 
-   ```
+   ```bash
    npx tsc --noEmit && npm run build
-   
    ```
 
-5. **Pratinjau hasil build produksi secara lokal (termasuk pengujian Service Worker / PWA)**
+5. **Preview the production bundle locally**
 
-   ```
+   ```bash
    npm run preview
-   
    ```
 
-## 🤝 Kontribusi
+---
 
-Proyek ini bersifat terbuka dan bebas digunakan untuk keperluan pribadi maupun pengembangan lebih lanjut. Jika Anda menemukan *bug*, memiliki ide penambahan dataset bahan makanan pokok lokal, atau ingin meningkatkan pengalaman pengguna, silakan ajukan *Issue* atau *Pull Request*.
+## Verification & Troubleshooting
 
-## 📄 Lisensi
+- **Type & Build Check**: Run `npx tsc --noEmit && npm run build` before opening a pull request or tagging a release.
+- **Stale LocalStorage State (`mealflow.workspace.v3`)**: If a previous session stored an older tab or schema state in `localStorage`, use the top-bar **Reset** action (confirmed via `ConfirmDialog`) or clear `mealflow.workspace.v3` in browser DevTools -> Application -> Local Storage.
+- **No Secrets or Environment Variables**: Because Mealflow runs entirely client-side with zero backend secrets, no `.env` file is required for local development.
 
-Didistribusikan di bawah lisensi **MIT**. Lihat berkas [LICENSE](https://www.google.com/search?q=./LICENSE) untuk informasi selengkapnya.
+---
+
+## Contributing & License
+
+- **Contributing**: Open an issue or pull request with clear reproduction steps, affected component paths, and verification results (`tsc --noEmit` and `npm run build`). Follow Conventional Commits (for example: `feat:`, `fix:`, `docs:`, `refactor:`).
+- **License**: Distributed under the **MIT License**. See [LICENSE](./LICENSE) for details.
