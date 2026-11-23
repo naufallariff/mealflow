@@ -9,7 +9,25 @@
 </p>
 
 <p align="center">
-  <code>MIT License</code> · <code>React 19</code> · <code>TypeScript (strict)</code> · <code>Tailwind CSS v4</code> · <code>Vite</code> · <code>Local-First PWA</code>
+  <a href="[https://react.dev/](https://react.dev/)">
+    <img src="[https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=111827](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=111827)" alt="React 19" />
+  </a>
+  <a href="[https://www.typescriptlang.org/](https://www.typescriptlang.org/)">
+    <img src="[https://img.shields.io/badge/TypeScript-strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white](https://img.shields.io/badge/TypeScript-strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)" alt="TypeScript strict" />
+  </a>
+  <a href="[https://tailwindcss.com/](https://tailwindcss.com/)">
+    <img src="[https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)" alt="Tailwind CSS v4" />
+  </a>
+  <a href="[https://vite.dev/](https://vite.dev/)">
+    <img src="[https://img.shields.io/badge/Vite-Bundler-646CFF?style=for-the-badge&logo=vite&logoColor=white](https://img.shields.io/badge/Vite-Bundler-646CFF?style=for-the-badge&logo=vite&logoColor=white)" alt="Vite" />
+  </a>
+  <a href="./LICENSE">
+    <img src="[https://img.shields.io/badge/License-MIT-10B981?style=for-the-badge](https://img.shields.io/badge/License-MIT-10B981?style=for-the-badge)" alt="License MIT" />
+  </a>
+</p>
+
+<p align="center">
+  <img src="[https://skillicons.dev/icons?i=react,ts,tailwind,vite,nodejs,git,github,vscode](https://skillicons.dev/icons?i=react,ts,tailwind,vite,nodejs,git,github,vscode)" alt="Tech Stack Icons" />
 </p>
 
 ---
