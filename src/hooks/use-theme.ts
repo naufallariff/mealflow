@@ -8,9 +8,13 @@ const THEME_STORAGE_KEY = 'mealflow.theme.v1';
 
 function getInitialTheme(): ThemeMode {
     if (typeof window === 'undefined') return 'light';
-    const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    try {
+        const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
+        if (saved === 'light' || saved === 'dark') return saved;
+    } catch {
+        // Abaikan jika akses storage diblokir
+    }
+    return 'light';
 }
 
 export function useTheme() {
@@ -21,7 +25,7 @@ export function useTheme() {
         try {
             window.localStorage.setItem(THEME_STORAGE_KEY, theme);
         } catch {
-            // Ignore private mode storage failures
+            // Abaikan error storage pada mode privat
         }
     }, [theme]);
 
@@ -44,11 +48,9 @@ export function useTheme() {
                 return;
             }
 
-            // Default origin: top-right theme button area
             const x = origin?.x ?? window.innerWidth - 36;
             const y = origin?.y ?? 32;
 
-            // Maximum distance to farthest corner (bottom-left)
             const endRadius = Math.hypot(
                 Math.max(x, window.innerWidth - x),
                 Math.max(y, window.innerHeight - y),
@@ -76,7 +78,7 @@ export function useTheme() {
                     );
                 })
                 .catch(() => {
-                    // Fallback if animation is interrupted
+                    // Abaikan bila transisi terpotong
                 });
         },
         [theme],

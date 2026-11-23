@@ -41,7 +41,7 @@ export function loadWorkspaceState(): Partial<MealflowPersistedState> | null {
 
     return {
       ...parsed,
-      activeTab: isValidTab(parsed.activeTab) ? parsed.activeTab : 'planner',
+      activeTab: isValidTab(parsed.activeTab) ? parsed.activeTab : 'grocery',
     };
   } catch {
     return null;
@@ -108,7 +108,7 @@ export function parseWorkspacePayload(
     }
     return {
       ...parsed,
-      activeTab: isValidTab(parsed.activeTab) ? parsed.activeTab : 'planner',
+      activeTab: isValidTab(parsed.activeTab) ? parsed.activeTab : 'grocery',
     };
   } catch {
     return null;
