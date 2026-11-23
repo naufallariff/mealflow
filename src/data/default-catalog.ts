@@ -1,71 +1,96 @@
 // src/data/default-catalog.ts
 
-import type { CatalogCategory, CatalogItem, MealPeriod } from '../types/meal';
-import rawCatalogItems from './catalog-items.json';
-import rawWeeklyPresets from './weekly-presets.json';
+import rawCatalog from './catalog-items.json';
+import type { CatalogCategory, CatalogItem, MealBundle } from '../types/meal';
 
-export const CATEGORY_META: Record<
-    CatalogCategory,
-    {
-        readonly label: string;
-        readonly badgeBg: string;
-        readonly badgeText: string;
-        readonly dotColor: string;
-    }
-> = {
-    'raw-ingredient': {
-        label: 'Bahan Segar',
-        badgeBg: 'bg-emerald-500/14 border-emerald-500/25',
-        badgeText: 'text-emerald-800 dark:text-emerald-300',
-        dotColor: 'bg-emerald-500',
-    },
-    'seasoning-pantry': {
-        label: 'Bumbu & Pokok',
-        badgeBg: 'bg-amber-500/14 border-amber-500/25',
-        badgeText: 'text-amber-800 dark:text-amber-300',
+export interface CategoryMeta {
+    readonly label: string;
+    readonly dotColor: string;
+    readonly badgeBg: string;
+    readonly badgeText: string;
+}
+
+export const CATEGORY_META: Readonly<Record<CatalogCategory, CategoryMeta>> = {
+    'staple-carb': {
+        label: 'Karbohidrat Pokok',
         dotColor: 'bg-amber-500',
+        badgeBg: 'border-amber-500/25 bg-amber-500/10',
+        badgeText: 'text-amber-700 dark:text-amber-300',
     },
-    'street-food': {
-        label: 'Masakan Harian',
-        badgeBg: 'bg-rose-500/14 border-rose-500/25',
-        badgeText: 'text-rose-800 dark:text-rose-300',
+    'animal-protein': {
+        label: 'Protein Hewani',
         dotColor: 'bg-rose-500',
+        badgeBg: 'border-rose-500/25 bg-rose-500/10',
+        badgeText: 'text-rose-700 dark:text-rose-300',
     },
-    'fancy-mall': {
-        label: 'Restoran & Kafe',
-        badgeBg: 'bg-purple-500/14 border-purple-500/25',
-        badgeText: 'text-purple-800 dark:text-purple-300',
-        dotColor: 'bg-purple-500',
+    'plant-protein-veg': {
+        label: 'Nabati & Sayur',
+        dotColor: 'bg-emerald-500',
+        badgeBg: 'border-emerald-500/25 bg-emerald-500/10',
+        badgeText: 'text-emerald-700 dark:text-emerald-300',
+    },
+    'pantry-seasoning': {
+        label: 'Minyak & Bumbu',
+        dotColor: 'bg-orange-500',
+        badgeBg: 'border-orange-500/25 bg-orange-500/10',
+        badgeText: 'text-orange-700 dark:text-orange-300',
     },
     'home-brew': {
-        label: 'Seduh Mandiri',
-        badgeBg: 'bg-sky-500/14 border-sky-500/25',
-        badgeText: 'text-sky-800 dark:text-sky-300',
-        dotColor: 'bg-sky-500',
-    },
-    'street-drink': {
         label: 'Minuman Harian',
-        badgeBg: 'bg-teal-500/14 border-teal-500/25',
-        badgeText: 'text-teal-800 dark:text-teal-300',
-        dotColor: 'bg-teal-500',
-    },
-    'cafe-mall': {
-        label: 'Kafe & Kedai',
-        badgeBg: 'bg-indigo-500/14 border-indigo-500/25',
-        badgeText: 'text-indigo-800 dark:text-indigo-300',
-        dotColor: 'bg-indigo-500',
+        dotColor: 'bg-sky-500',
+        badgeBg: 'border-sky-500/25 bg-sky-500/10',
+        badgeText: 'text-sky-700 dark:text-sky-300',
     },
 };
 
-export interface WeeklyPatternPreset {
-    readonly id: string;
-    readonly name: string;
-    readonly subtitle: string;
-    readonly pattern: Record<
-        number,
-        Record<MealPeriod, readonly { readonly itemId: string; readonly portions: number }[]>
-    >;
-}
+export const CATEGORY_LABELS: Readonly<Record<CatalogCategory, string>> = {
+    'staple-carb': 'Karbohidrat Pokok',
+    'animal-protein': 'Protein Hewani',
+    'plant-protein-veg': 'Protein Nabati & Sayur',
+    'pantry-seasoning': 'Minyak & Bumbu Dapur',
+    'home-brew': 'Minuman Pokok Harian',
+};
 
-export const DEFAULT_CATALOG = rawCatalogItems as readonly CatalogItem[];
-export const WEEKLY_PRESETS = rawWeeklyPresets as readonly WeeklyPatternPreset[];
+export const CATEGORY_ORDER: readonly CatalogCategory[] = [
+    'staple-carb',
+    'animal-protein',
+    'plant-protein-veg',
+    'pantry-seasoning',
+    'home-brew',
+];
+
+export const DEFAULT_CATALOG: readonly CatalogItem[] =
+    rawCatalog as readonly CatalogItem[];
+
+export const DEFAULT_MEAL_BUNDLES: readonly MealBundle[] = [
+    {
+        id: 'bundle-nasi-telur-sayur',
+        name: 'Nasi + Telur + Sayur',
+        preferredPeriods: ['breakfast', 'lunch', 'dinner'],
+        components: [
+            { itemId: 'beras-putih', portions: 1 },
+            { itemId: 'telur-ayam', portions: 1 },
+            { itemId: 'sayur-harian', portions: 1 },
+        ],
+    },
+    {
+        id: 'bundle-nasi-ayam-sayur',
+        name: 'Nasi + Ayam + Sayur',
+        preferredPeriods: ['lunch', 'dinner'],
+        components: [
+            { itemId: 'beras-putih', portions: 1 },
+            { itemId: 'ayam-potong', portions: 1 },
+            { itemId: 'sayur-harian', portions: 1 },
+        ],
+    },
+    {
+        id: 'bundle-nasi-tempe-tahu',
+        name: 'Nasi + Tempe + Tahu',
+        preferredPeriods: ['lunch', 'dinner'],
+        components: [
+            { itemId: 'beras-putih', portions: 1 },
+            { itemId: 'tempe-papan', portions: 1 },
+            { itemId: 'tahu-putih', portions: 1 },
+        ],
+    },
+];

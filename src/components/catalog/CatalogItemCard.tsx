@@ -1,127 +1,112 @@
 // src/components/catalog/CatalogItemCard.tsx
 
 import React from 'react';
-import { GripVertical, Pencil, Plus, Trash2 } from 'lucide-react';
-import type { CatalogItem } from '../../types/meal';
+import { CalendarPlus, Pencil, RotateCcw, Trash2 } from 'lucide-react';
 import { CATEGORY_META } from '../../data/default-catalog';
-import { formatIdr } from '../../utils/currency';
+import type { CatalogItem } from '../../types/meal';
+import { formatRupiah } from '../../utils/format';
 
 interface CatalogItemCardProps {
     readonly item: CatalogItem;
-    readonly usedCount: number;
+    readonly usedCount?: number;
     readonly isOverridden?: boolean;
     readonly onQuickSchedule: (item: CatalogItem) => void;
     readonly onEditItem?: (item: CatalogItem) => void;
+    readonly onResetItem?: (itemId: string) => void;
     readonly onDeleteCustom?: (itemId: string) => void;
 }
 
-export const CatalogItemCard: React.FC<CatalogItemCardProps> = React.memo(
-    ({
-        item,
-        usedCount,
-        isOverridden = false,
-        onQuickSchedule,
-        onEditItem,
-        onDeleteCustom,
-    }) => {
-        const meta = CATEGORY_META[item.category];
-        const perPortion = Math.round(
-            item.packPrice / Math.max(1, item.portionsPerPack),
-        );
+export const CatalogItemCard: React.FC<CatalogItemCardProps> = ({
+    item,
+    usedCount = 0,
+    isOverridden = false,
+    onQuickSchedule,
+    onEditItem,
+    onResetItem,
+    onDeleteCustom,
+}) => {
+    const meta = CATEGORY_META[item.category];
+    const safeYield = Math.max(1, item.portionsPerPack);
+    const unitConsumptionPrice = Math.round(item.packPrice / safeYield);
 
-        const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-            e.dataTransfer.setData('text/plain', item.id);
-            e.dataTransfer.effectAllowed = 'copy';
-        };
-
-        return (
-            <div
-                draggable
-                onDragStart={handleDragStart}
-                className="mf-catalog-card group cursor-grab active:cursor-grabbing"
-            >
-                <div className="flex min-w-0 flex-1 items-start gap-2">
-                    <GripVertical
-                        aria-hidden="true"
-                        className="mt-1 hidden h-4 w-4 shrink-0 text-ink-muted/70 transition-colors group-hover:text-ink-secondary sm:block"
-                    />
-                    <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                            <p
-                                title={item.name}
-                                className="truncate text-xs font-bold tracking-tight text-ink-primary"
-                            >
-                                {item.name}
-                            </p>
-                            {usedCount > 0 && (
-                                <span className="tabular-nums shrink-0 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 px-1.5 py-0.5 text-[10px] font-extrabold text-white shadow-2xs">
-                                    {usedCount}x
-                                </span>
-                            )}
-                            {isOverridden && (
-                                <span className="shrink-0 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-bold text-amber-700 dark:text-amber-300">
-                                    Diubah
-                                </span>
-                            )}
-                        </div>
-
-                        <p className="tabular-nums mt-0.5 text-[11px] font-medium text-ink-secondary">
-                            {item.packUnit} ·{' '}
-                            <strong className="font-bold text-ink-primary">
-                                {formatIdr(item.packPrice)}
-                            </strong>
-                        </p>
-
-                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+    return (
+        <div className="rounded-2xl border border-(--border-subtle) bg-(--glass-card-subtle) p-3 transition-colors hover:border-brand/50">
+            <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        <span
+                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${meta.badgeBg} ${meta.badgeText}`}
+                        >
                             <span
-                                className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${meta.badgeBg} ${meta.badgeText}`}
-                            >
-                                <span className={`h-1.5 w-1.5 rounded-full ${meta.dotColor}`} />
-                                {meta.label}
+                                className={`h-1.5 w-1.5 rounded-full ${meta.dotColor}`}
+                                aria-hidden="true"
+                            />
+                            <span>{meta.label}</span>
+                        </span>
+
+                        {usedCount > 0 && (
+                            <span className="tabular-nums rounded-full bg-brand-glass px-2 py-0.5 text-[10px] font-extrabold text-brand">
+                                {usedCount}x / bln
                             </span>
-                            <span className="tabular-nums text-[10px] font-medium text-ink-muted">
-                                {formatIdr(perPortion)}/porsi (÷{item.portionsPerPack})
-                            </span>
-                        </div>
+                        )}
                     </div>
+
+                    <h3 className="mt-1.5 truncate text-xs font-extrabold text-ink-primary">
+                        {item.name}
+                    </h3>
+                    <p className="mt-0.5 tabular-nums text-[11px] font-semibold text-ink-secondary">
+                        {item.consumptionUnit} · {formatRupiah(unitConsumptionPrice)}
+                    </p>
+                    <p className="mt-0.5 tabular-nums text-[10px] text-ink-muted">
+                        Kemasan: {item.packUnit} ({formatRupiah(item.packPrice)}, isi{' '}
+                        {safeYield})
+                    </p>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1.5">
+                <div className="flex shrink-0 items-center gap-1">
                     {onEditItem && (
                         <button
                             type="button"
                             onClick={() => onEditItem(item)}
-                            title="Ubah harga atau porsi"
-                            aria-label={`Ubah ${item.name}`}
-                            className="flex h-8 w-8 items-center justify-center rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) text-ink-secondary transition-transform duration-150 hover:text-brand active:scale-90"
+                            aria-label={`Ubah harga atau satuan ${item.name}`}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl border border-(--border-subtle) bg-(--glass-card) text-ink-secondary transition-colors cursor-pointer hover:border-brand hover:text-ink-primary focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40"
                         >
-                            <Pencil className="h-3.5 w-3.5" />
+                            <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
                         </button>
                     )}
+
+                    {isOverridden && onResetItem && !item.isCustom && (
+                        <button
+                            type="button"
+                            onClick={() => onResetItem(item.id)}
+                            aria-label={`Kembalikan harga bawaan ${item.name}`}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl border border-(--border-subtle) bg-(--glass-card) text-ink-secondary transition-colors cursor-pointer hover:border-brand hover:text-ink-primary focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40"
+                        >
+                            <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+                    )}
+
                     {item.isCustom && onDeleteCustom && (
                         <button
                             type="button"
                             onClick={() => onDeleteCustom(item.id)}
-                            title="Hapus item kustom"
-                            aria-label={`Hapus item kustom ${item.name}`}
-                            className="flex h-8 w-8 items-center justify-center rounded-full border border-(--border-subtle) bg-(--glass-card-subtle) text-red-600 transition-transform duration-150 hover:bg-red-500/12 active:scale-90 dark:text-red-400"
+                            aria-label={`Hapus item ${item.name}`}
+                            className="flex h-10 w-10 items-center justify-center rounded-xl border border-(--border-subtle) bg-(--glass-card) text-ink-secondary transition-colors cursor-pointer hover:border-rose-500/40 hover:bg-rose-500/10 hover:text-rose-600 focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-brand/40"
                         >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                         </button>
                     )}
-                    <button
-                        type="button"
-                        onClick={() => onQuickSchedule(item)}
-                        data-variant="primary"
-                        className="mf-liquid-pill min-h-8.5 px-3 text-xs"
-                    >
-                        <Plus className="h-3.5 w-3.5" />
-                        <span>Pasang</span>
-                    </button>
                 </div>
             </div>
-        );
-    },
-);
 
-CatalogItemCard.displayName = 'CatalogItemCard';
+            <button
+                type="button"
+                onClick={() => onQuickSchedule(item)}
+                className="mf-liquid-pill mt-2.5 min-h-10 w-full justify-center px-3 text-xs font-bold cursor-pointer"
+            >
+                <CalendarPlus className="h-3.5 w-3.5 text-brand" aria-hidden="true" />
+                <span>Pasang ke Slot Kalender</span>
+            </button>
+        </div>
+    );
+};
