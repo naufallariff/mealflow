@@ -9,11 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="./LICENSE"><img src="[https://img.shields.io/badge/License-MIT-blue.svg](https://img.shields.io/badge/License-MIT-blue.svg)" alt="License: MIT" /></a>
-  <img src="[https://img.shields.io/badge/TypeScript-strict-3178C6.svg](https://img.shields.io/badge/TypeScript-strict-3178C6.svg)" alt="TypeScript strict" />
-  <img src="[https://img.shields.io/badge/React-19-149ECA.svg](https://img.shields.io/badge/React-19-149ECA.svg)" alt="React 19" />
-  <img src="[https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4.svg](https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4.svg)" alt="Tailwind CSS v4" />
-  <img src="[https://img.shields.io/badge/Architecture-Local--First-10B981.svg](https://img.shields.io/badge/Architecture-Local--First-10B981.svg)" alt="Local-First" />
+  <code>MIT License</code> · <code>React 19</code> · <code>TypeScript (strict)</code> · <code>Tailwind CSS v4</code> · <code>Vite</code> · <code>Local-First PWA</code>
 </p>
 
 ---
@@ -25,28 +21,28 @@
     <tr>
       <td align="center" valign="top">
         <a href="./docs/screenshots/mobile-dashboard.png">
-          <img src="./docs/screenshots/mobile-dashboard.png" alt="Mealflow Mobile Dashboard Preview" width="220" />
+          <img src="./docs/screenshots/mobile-dashboard.png" alt="Mealflow Mobile Dashboard Preview" width="210" />
         </a>
         <br />
         <sub><strong>Dashboard & Cashier</strong></sub>
       </td>
       <td align="center" valign="top">
         <a href="./docs/screenshots/mobile-planner.png">
-          <img src="./docs/screenshots/mobile-planner.png" alt="Mealflow Mobile Planner Preview" width="220" />
+          <img src="./docs/screenshots/mobile-planner.png" alt="Mealflow Mobile Planner Preview" width="210" />
         </a>
         <br />
         <sub><strong>Monthly Planner (Rencana)</strong></sub>
       </td>
       <td align="center" valign="top">
         <a href="./docs/screenshots/mobile-calendar.png">
-          <img src="./docs/screenshots/mobile-calendar.png" alt="Mealflow Mobile 31-Day Calendar Preview" width="220" />
+          <img src="./docs/screenshots/mobile-calendar.png" alt="Mealflow Mobile 31-Day Calendar Preview" width="210" />
         </a>
         <br />
         <sub><strong>31-Day Calendar (Kalender)</strong></sub>
       </td>
       <td align="center" valign="top">
         <a href="./docs/screenshots/mobile-catalog.png">
-          <img src="./docs/screenshots/mobile-catalog.png" alt="Mealflow Mobile Catalog Preview" width="220" />
+          <img src="./docs/screenshots/mobile-catalog.png" alt="Mealflow Mobile Catalog Preview" width="210" />
         </a>
         <br />
         <sub><strong>Staple Catalog (Katalog)</strong></sub>
@@ -54,8 +50,6 @@
     </tr>
   </table>
 </div>
-
-> **screenshots Assets (`./docs/screenshots/`):** Place your mobile viewport captures at `./docs/screenshots/mobile-dashboard.png`, `./docs/screenshots/mobile-planner.png`, `./docs/screenshots/mobile-calendar.png`, and `./docs/screenshots/mobile-catalog.png`.
 
 ---
 
@@ -86,11 +80,11 @@ Mealflow follows a **Consumption-First Input, Retail-Pack Output** model tailore
 
 ## Core Features & UX Guardrails
 
-- **Curated Staple Catalog & Custom Overrides**: Organized into core food and home-brew drink categories (`src/data/default-catalog.ts`, `src/data/catalog-items.json`). Supports custom items, local price/pack overrides, and reset to defaults without leaving the client.
-- **Monthly Frequency Planner & Editable Meal Bundles**: Adjust monthly portions via `+/-` steppers or numeric input, use starter templates (*Pola Hemat Anak Kos* and *Pola Dapur Harian*), and apply editable meal bundles that decompose into raw staple portions.
-- **Interactive 31-Day Calendar & Slot Picker**: Supports `Sebar Porsi ke Kalender`, desktop drag-and-drop, mobile tap-to-place (`pendingItem`), week copying (`Salin ke M{n+1}`), 31-day pattern duplication (`Terapkan 31 Hari`), and direct slot selection via `SlotMenuPickerModal` (`onOpenSlotPicker`).
-- **Destructive & Overwrite Confirmation Guardrails**: Actions that overwrite existing plans or clear state—such as applying starter templates (`InteractiveEmptyState`), duplicating a week across 31 days, clearing a day, or resetting the workspace—trigger `ConfirmDialog` (`role="alertdialog"`) to prevent accidental taps on mobile viewports.
-- **Dashboard-First Entry & Cashier Checklist**: Opens on the **Dashboard** view (`grocery` / `dashboard`) with budget absorption progress, category breakdown, cashier checklist (`checkedItemIds`), WhatsApp/plain-text grocery export, optional average daily nutrition estimates, and JSON backup/restore (`storage-engine.ts`).
+- **Curated Staple Catalog & Custom Overrides**: Organized into core food and home-brew drink categories (`src/data/default-catalog.ts`, `src/data/catalog-items.json`). Supports custom items (`CustomItemModal.tsx`), local price/pack overrides, and reset to defaults without leaving the client.
+- **Monthly Frequency Planner & Editable Meal Bundles**: Adjust monthly portions via `+/-` steppers or numeric input, use starter templates (*Pola Hemat Anak Kos* and *Pola Dapur Harian*), and apply editable meal bundles (`MealBundleModal.tsx`) that decompose into raw staple portions.
+- **Interactive 31-Day Calendar & Slot Picker**: Supports `Sebar Porsi ke Kalender`, desktop drag-and-drop, mobile tap-to-place (`pendingItem`), week copying (`Salin ke M{n+1}`), 31-day pattern duplication (`Terapkan 31 Hari`), and direct slot selection via `SlotMenuPickerModal`.
+- **Destructive & Overwrite Confirmation Guardrails**: Actions that overwrite existing plans or clear state—such as applying starter templates (`InteractiveEmptyState.tsx`), duplicating a week across 31 days, clearing a day, or resetting the workspace—trigger `ConfirmDialog` (`role="alertdialog"`) to prevent accidental taps on mobile viewports.
+- **Dashboard-First Entry & Cashier Checklist**: Opens on the **Dashboard** view (`grocery`) with budget absorption progress, category breakdown, cashier checklist (`checkedItemIds`), WhatsApp/plain-text grocery export, optional average daily nutrition estimates, and JSON backup/restore (`WorkspaceBackupBar.tsx`, `storage-engine.ts`).
 - **Theme Transitions & Offline PWA**: Light/dark mode with View Transitions API support (`use-theme.ts`), `localStorage` persistence (`mealflow.workspace.v3`), Web App Manifest (`public/manifest.webmanifest`), and Service Worker (`public/sw.js`).
 
 ---
@@ -99,18 +93,18 @@ Mealflow follows a **Consumption-First Input, Retail-Pack Output** model tailore
 
 | Layer | Technology | Role & Engineering Notes |
 | :--- | :--- | :--- |
-| **UI Framework** | React 19 + TypeScript | Declarative components with strict mode and `verbatimModuleSyntax` |
-| **Build & Dev Server** | Vite | Fast HMR, production bundling, and local preview server |
-| **Styling** | Tailwind CSS v4 | CSS-first styling, semantic design tokens (`tokens.css`), and bento layouts (`components.css`) |
-| **Icons** | Lucide React | Vector UI icons |
-| **Offline & PWA** | Web App Manifest + Service Worker | Static asset caching and offline support (`public/sw.js`, `public/manifest.webmanifest`) |
-| **Static Analysis** | TypeScript (`tsc --noEmit`) & Oxlint | Type safety and static lint checks |
+| **UI Framework** | React 19 + TypeScript | Declarative UI with strict typing (`tsconfig.app.json`, `tsconfig.node.json`) |
+| **Build & Dev Server** | Vite | Fast HMR, production bundling, and local preview server (`vite.config.ts`) |
+| **Styling** | Tailwind CSS v4 | CSS-first styling, semantic design tokens (`tokens.css`), and component layouts (`components.css`) |
+| **Icons** | Lucide React | Vector UI icons across navigation, cards, modals, and checklists |
+| **Offline & PWA** | Web App Manifest + Service Worker | Static asset caching and offline navigation support (`public/sw.js`, `public/manifest.webmanifest`) |
+| **Static Analysis** | TypeScript (`tsc --noEmit`) | Type safety verification across application and tooling configs |
 
 ---
 
 ## System Architecture
 
-Mealflow runs **100% client-side (Local-First, Zero-Backend)** with deterministic arithmetic in domain utilities and debounced persistence to `window.localStorage`:
+Mealflow runs **100% client-side (Local-First, Zero-Backend)** with deterministic arithmetic in domain utilities and debounced persistence to `window.localStorage`. For full architectural details and the development roadmap, see [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) and [docs/ROADMAP.md](./docs/ROADMAP.md).
 
 ```text
 +-----------------------------------------------------------------------+
@@ -134,7 +128,7 @@ Mealflow runs **100% client-side (Local-First, Zero-Backend)** with deterministi
 |  budget-engine.ts --------> Portion Aggregation, Retail Pack Rounding,|
 |                             Leftover Stock (<50% Flag), Smart Pantry  |
 |  export-and-nutrition.ts -> Plain-Text Grocery List & 31-Day Macros  |
-|  format.ts --------------> IDR (`Rp`) Formatting & Compact Labels      |
+|  format.ts / currency.ts -> IDR (`Rp`) Formatting & Compact Labels      |
 +-----------------------------------------------------------------------+
 ```
 
@@ -143,59 +137,82 @@ Mealflow runs **100% client-side (Local-First, Zero-Backend)** with deterministi
 ## Project Structure
 
 ```text
-mealflow/
-├── docs/
-│   └── screenshots/
-│       ├── mobile-calendar.png
-│       ├── mobile-catalog.png
-│       ├── mobile-dashboard.png
-│       └── mobile-planner.png
-├── public/
-│   ├── favicon.svg
-│   ├── manifest.webmanifest
-│   └── sw.js
-├── src/
-│   ├── components/
-│   │   ├── brand/
-│   │   ├── calendar/
-│   │   │   ├── MealSlotCard.tsx
-│   │   │   ├── SlotMenuPickerModal.tsx
-│   │   │   └── WeeklyCalendarGrid.tsx
-│   │   ├── catalog/
-│   │   ├── dashboard/
-│   │   ├── layout/
-│   │   ├── planner/
-│   │   │   ├── InteractiveEmptyState.tsx
-│   │   │   ├── MealBundleModal.tsx
-│   │   │   └── MonthlyFrequencyPlanner.tsx
-│   │   ├── summary/
-│   │   └── ui/
-│   │       └── ConfirmDialog.tsx
-│   ├── data/
-│   │   ├── catalog-items.json
-│   │   └── default-catalog.ts
-│   ├── hooks/
-│   │   ├── use-debounced-value.ts
-│   │   ├── use-mealflow-store.ts
-│   │   └── use-theme.ts
-│   ├── services/
-│   │   └── storage-engine.ts
-│   ├── styles/
-│   │   ├── components.css
-│   │   ├── index.css
-│   │   └── tokens.css
-│   ├── types/
-│   │   └── meal.ts
-│   ├── utils/
-│   │   ├── budget-engine.ts
-│   │   ├── export-and-nutrition.ts
-│   │   └── format.ts
-│   ├── App.tsx
-│   └── main.tsx
-├── index.html
-├── package.json
-├── tsconfig.json
-└── vite.config.ts
+.
+|-- AGENTS.md
+|-- docs
+|  |-- ARCHITECTURE.md
+|  |-- ROADMAP.md
+|  |-- screenshots
+|  |  |-- mobile-calendar.png
+|  |  |-- mobile-catalog.png
+|  |  |-- mobile-dashboard.png
+|  |  |-- mobile-planner.png
+|-- index.html
+|-- LICENSE
+|-- package-lock.json
+|-- package.json
+|-- public
+|  |-- favicon.svg
+|  |-- manifest.webmanifest
+|  |-- sw.js
+|-- README.md
+|-- src
+|  |-- App.tsx
+|  |-- components
+|  |  |-- brand
+|  |  |  |-- MealflowBrandMark.tsx
+|  |  |-- calendar
+|  |  |  |-- MealSlotCard.tsx
+|  |  |  |-- SlotMenuPickerModal.tsx
+|  |  |  |-- WeeklyCalendarGrid.tsx
+|  |  |-- catalog
+|  |  |  |-- CatalogItemCard.tsx
+|  |  |  |-- CatalogPanel.tsx
+|  |  |  |-- CustomItemModal.tsx
+|  |  |-- dashboard
+|  |  |  |-- OngoingDashboardView.tsx
+|  |  |  |-- WorkspaceBackupBar.tsx
+|  |  |-- layout
+|  |  |  |-- FeatureWalkthroughModal.tsx
+|  |  |  |-- FloatingGuideWidget.tsx
+|  |  |  |-- FloatingNavbar.tsx
+|  |  |  |-- MobileBottomNav.tsx
+|  |  |-- planner
+|  |  |  |-- InteractiveEmptyState.tsx
+|  |  |  |-- MealBundleModal.tsx
+|  |  |  |-- MonthlyFrequencyPlanner.tsx
+|  |  |-- summary
+|  |  |  |-- BudgetTargetCard.tsx
+|  |  |  |-- GrocerySummaryPanel.tsx
+|  |  |-- ui
+|  |  |  |-- ConfirmDialog.tsx
+|  |  |  |-- CustomSelect.tsx
+|  |-- data
+|  |  |-- catalog-items.json
+|  |  |-- default-catalog.ts
+|  |-- hooks
+|  |  |-- use-debounced-value.ts
+|  |  |-- use-mealflow-store.ts
+|  |  |-- use-scroll-direction.ts
+|  |  |-- use-theme.ts
+|  |-- main.tsx
+|  |-- services
+|  |  |-- storage-engine.ts
+|  |-- styles
+|  |  |-- components.css
+|  |  |-- index.css
+|  |  |-- tokens.css
+|  |-- types
+|  |  |-- meal.ts
+|  |-- utils
+|  |  |-- budget-engine.ts
+|  |  |-- currency.ts
+|  |  |-- export-and-nutrition.ts
+|  |  |-- format.ts
+|-- tsconfig.app.json
+|-- tsconfig.json
+|-- tsconfig.node.json
+|-- vite.config.ts
 ```
 
 ---
@@ -204,22 +221,22 @@ mealflow/
 
 ### Prerequisites
 
-- **Node.js**: Active/Maintenance LTS release (check `package.json` `engines` or install Node.js 20+/22+ LTS).
-- **Package Manager**: `npm` (or `pnpm` / `yarn` compatible with `package.json` scripts).
+- **Node.js**: Active/Maintenance LTS release compatible with `package.json`.
+- **Package Manager**: `npm` (lockfile tracked in `package-lock.json`).
 
 ### Installation & Local Development
 
 1. **Clone and enter the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/naufallariff/mealflow.git
    cd mealflow
    ```
 
 2. **Install dependencies**
 
    ```bash
-   npm install
+   npm ci
    ```
 
 3. **Start the development server**
@@ -245,6 +262,7 @@ mealflow/
 ## Verification & Troubleshooting
 
 - **Type & Build Check**: Run `npx tsc --noEmit && npm run build` before opening a pull request or tagging a release.
+- **Broken External Badge Images**: If `shields.io` badges fail to load due to network or browser shield restrictions, keep lightweight text/code badges as used in this README.
 - **Stale LocalStorage State (`mealflow.workspace.v3`)**: If a previous session stored an older tab or schema state in `localStorage`, use the top-bar **Reset** action (confirmed via `ConfirmDialog`) or clear `mealflow.workspace.v3` in browser DevTools -> Application -> Local Storage.
 - **No Secrets or Environment Variables**: Because Mealflow runs entirely client-side with zero backend secrets, no `.env` file is required for local development.
 
@@ -252,5 +270,5 @@ mealflow/
 
 ## Contributing & License
 
-- **Contributing**: Open an issue or pull request with clear reproduction steps, affected component paths, and verification results (`tsc --noEmit` and `npm run build`). Follow Conventional Commits (for example: `feat:`, `fix:`, `docs:`, `refactor:`).
+- **Contributing**: Open an issue or pull request with clear reproduction steps, affected component paths, and verification results (`npx tsc --noEmit` and `npm run build`). Follow Conventional Commits (for example: `feat:`, `fix:`, `docs:`, `refactor:`).
 - **License**: Distributed under the **MIT License**. See [LICENSE](./LICENSE) for details.
