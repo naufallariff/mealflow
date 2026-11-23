@@ -1,0 +1,18 @@
+{
+    "name": "Mealflow - Perencana Belanja Pokok Bulanan",
+    "short_name": "Mealflow",
+    "description": "Hitung anggaran belanja bahan pokok bulanan, pembulatan kemasan pasar, dan jadwal makan 31 hari secara offline.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f8fafc",
+    "theme_color": "#0284c7",
+    "lang": "id",
+    "icons": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
